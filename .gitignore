@@ -19,3 +19,9 @@
 *.iws
 out
 target
+
+# python cache
+
+*/__pycache__
+/__pycache__
+*.pyc
