@@ -1,0 +1,21 @@
+# GIT ignoration configuration
+
+# log files
+*.log
+
+# some local files
+*/.settings/
+*/.DS_Store
+.DS_Store
+*/.idea/
+.idea/
+
+# IntelliJ files
+*.iml
+*/*.iml
+.idea
+*.iml
+*.ipr
+*.iws
+out
+target
