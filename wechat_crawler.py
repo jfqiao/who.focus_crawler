@@ -8,19 +8,19 @@ import xlwt
 import time
 import datetime
 import re
+import os
+import sys
 
 
 class WechatArticleCrawler(object):
-
-    article_id = 1
 
     pattern = "var msg_cdn_url = \"(.*)\";"
 
     # 获取到图片地址后，文章信息保存的目录。
     write_dir = "/Users/jfqiao/Desktop/write_aritlce_dirs/"
 
-    # 爬取微信文章内容保存的目录。
-    article_dir = "/Users/jfqiao/Desktop/wechat_articles_dir/03_08/"
+    # 爬取微信文章内容保存的目录,以月份_日期作为文件夹的名称。
+    article_dir = "/Users/jfqiao/Desktop/wechat_articles_dir/%s/"
 
     search_url_format = "http://weixin.sogou.com/weixin?type=2&s_from=input&query=%s"
 
@@ -93,6 +93,7 @@ class WechatArticleCrawler(object):
         :param file_path: 从西瓜上爬取的结果保存所在的文件。
         :return:
         """
+        WechatArticleCrawler.mkdir_for_articles()
         read_workbook = xlrd.open_workbook(file_path)
         write_workbook = xlwt.Workbook(encoding="ascii")
         write_sheet = write_workbook.add_sheet("articles")
@@ -101,17 +102,26 @@ class WechatArticleCrawler(object):
         for i in range(read_table.ncols):
             write_sheet.write(0, i, label=read_table.cell(0, i).value)
         i = 1
-        while i < rows_num:
-            title = read_table.cell(i, 0).value
-            url = read_table.cell(i, 1).value
-            # image_url = WechatArticleCrawler.search_by_title(title)
-            image_url = WechatArticleCrawler.crawl_article_content(url, title)
-            write_sheet.write(i, 0, label=title)
-            write_sheet.write(i, 1, label=url)
-            write_sheet.write(i, 2, label=image_url)
-            for j in range(3, read_table.ncols):
-                write_sheet.write(i, j, label=read_table.cell(i, j).value)
-            i = i + 1
+        try:
+            while i < rows_num:
+                try:
+                    title = read_table.cell(i, 0).value
+                    url = read_table.cell(i, 1).value
+                    # image_url = WechatArticleCrawler.search_by_title(title)
+                    image_url = WechatArticleCrawler.crawl_article_content(url, title)
+                    if len(image_url) == 0:   # 过滤掉已被发布者删除的文章。
+                        continue
+                    write_sheet.write(i, 0, label=title)
+                    write_sheet.write(i, 1, label=url)
+                    write_sheet.write(i, 2, label=image_url)
+                    for j in range(3, read_table.ncols):
+                        write_sheet.write(i, j, label=read_table.cell(i, j).value)
+                    i = i + 1
+                    print(i)
+                except BaseException as e:
+                    print(e)
+        except BaseException as e:
+            print(e)
         write_workbook.save(WechatArticleCrawler.write_dir + "result_" + datetime.datetime.now().strftime("%Y-%m-"
                             "%d_%H-%M-%S") + ".xls")
 
@@ -166,6 +176,17 @@ class WechatArticleCrawler(object):
         f.write(content.__str__())
         f.close()
 
+    @staticmethod
+    def mkdir_for_articles():
+        now = datetime.datetime.now()
+        date_str = now.strftime("%m_%d-%H_%M")
+        WechatArticleCrawler.article_dir = WechatArticleCrawler.article_dir % date_str
+        path = WechatArticleCrawler.article_dir
+        if not os.path.exists(path):
+            cmd = "mkdir %s" % path
+            os.system(cmd)
+
 
 if __name__ == "__main__":
-    WechatArticleCrawler.get_url_and_set("/Users/jfqiao/Desktop/xi_gua_articles/2018-03-08_14-05.xls")
+    sys.setrecursionlimit(100000)
+    WechatArticleCrawler.get_url_and_set("/Users/jfqiao/Desktop/xi_gua_articles/2018-03-11_15-49.xls")

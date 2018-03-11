@@ -20,7 +20,7 @@ class XiGuaCrawler(object):
     cookies_dict = {}
 
     # 直接登录后拿到的cookie, 以后需要模拟登录拿数据
-    cookies_str = 'LoginTag=a9c2d09d95da4e668a9730d103fa4ff9; _XIGUASTATE=XIGUASTATEID=b9046bc650534e7bb8325da9000c58ce; ASP.NET_SessionId=n4llk4tgfij3djdbvubjwugm; _XIGUA=UserId=d471a30ba6f3c365&Account=fd0673b157bef6e1f2b65e9f22a7aed8&checksum=4be8ae8c72b3; SaveUserName=18911949659; LV2=1; Big3Biz672571=False; ExploreTags672571=; ShowOneKeyAsyncTip=1; ShowOneKeyAsyncTip2=1; _chl=key=FromBaidu&word=6KW/55Oc5Yqp5omL; Hm_lvt_72aa476a79cf5b994d99ee60fe6359aa=1519877093,1520314467,1520488035; Hm_lpvt_72aa476a79cf5b994d99ee60fe6359aa=1520488035; SERVERID=2e7fd5d7f4caba1a3ae6a9918d4cc9a6|1520488849|1520488036'
+    cookies_str = 'LoginTag=a9c2d09d95da4e668a9730d103fa4ff9; _XIGUASTATE=XIGUASTATEID=b9046bc650534e7bb8325da9000c58ce; ASP.NET_SessionId=n4llk4tgfij3djdbvubjwugm; _XIGUA=UserId=d471a30ba6f3c365&Account=fd0673b157bef6e1f2b65e9f22a7aed8&checksum=4be8ae8c72b3; SaveUserName=18911949659; LV2=1; Big3Biz672571=False; ExploreTags672571=; ShowOneKeyAsyncTip=1; ShowOneKeyAsyncTip2=1; _chl=key=FromBaidu&word=6KW/55Oc; Hm_lvt_72aa476a79cf5b994d99ee60fe6359aa=1519877093,1520314467,1520488035,1520737791; Hm_lpvt_72aa476a79cf5b994d99ee60fe6359aa=1520737791; SERVERID=2e7fd5d7f4caba1a3ae6a9918d4cc9a6|1520752213|1520737796'
 
     enter_url = "http://zs.xiguaji.com/MArticle/Attention"
 
