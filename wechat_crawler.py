@@ -110,6 +110,7 @@ class WechatArticleCrawler(object):
                     # image_url = WechatArticleCrawler.search_by_title(title)
                     image_url = WechatArticleCrawler.crawl_article_content(url, title)
                     if len(image_url) == 0:   # 过滤掉已被发布者删除的文章。
+                        i += 1
                         continue
                     write_sheet.write(i, 0, label=title)
                     write_sheet.write(i, 1, label=url)
@@ -146,11 +147,21 @@ class WechatArticleCrawler(object):
                 class_list = item.get("class")
                 if class_list is not None and "__bg_gif" in item.get("class"):  # 去除掉一些背景gif图片
                     continue
+                # 图片的宽度小于100不需要
                 width = item.get("width")
                 try:
                     if width is not None:
                         width = int(width.replace("px", ""))
                         if width < 100:
+                            continue
+                except ValueError:
+                    pass
+                # 有的图片是用_width表示的宽度。
+                width = item.get("data-w")
+                try:
+                    if width is not None:
+                        width = int(width.replace("px", ""))
+                        if width < 50:
                             continue
                 except ValueError:
                     pass
@@ -189,4 +200,4 @@ class WechatArticleCrawler(object):
 
 if __name__ == "__main__":
     sys.setrecursionlimit(100000)
-    WechatArticleCrawler.get_url_and_set("/Users/jfqiao/Desktop/xi_gua_articles/2018-03-11_15-49.xls")
+    WechatArticleCrawler.get_url_and_set("/Users/jfqiao/Desktop/xi_gua_articles/2018-03-12_13-32.xls")

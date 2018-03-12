@@ -21,7 +21,7 @@ class ClearFunction(object):
         :param date_str:  给定的时间字符串，格式为 yyyy-mm-dd HH:MM:SS.
         :return: 返回的结果是一个list，其中每一项都是dict，利用列的名字进行索引即可。
         """
-        sql = "SELECT id FROM t_article WHERE publish_time < \"%s\"" % date_str
+        sql = "SELECT id FROM t_article WHERE publish_time <= \"%s\"" % date_str
         result = DBUtil.select_datas(sql)
         return result
 
@@ -52,9 +52,29 @@ class ClearFunction(object):
         article_ids = ClearFunction.get_article_id(date_str)
         ClearFunction.clear_articles_with_id(article_ids)
 
+    @staticmethod
+    def time_convert(date_str):
+        """
+        按照将每篇文章保留在页面上10个小时的需求（0点到6点不算在保留时间累积），清理文章。每天需要清理的时间为7点到24点。
+        每到整点开始清理。7点到16点清理前一天15点到24点的数据，17点清理当天0点到7点的数据（按照时间清理应该给定7点即可，早于7点均会清理），
+        18点到24点清理对应8点到14点上传的数据。
+        :param date_str: 当前清理的时间
+        :return: 需要清理的文章的时间，早于该时间的文章全部清理。
+        """
+        date_now = datetime.datetime.strptime(date_str, ClearFunction.DATE_FORMAT_STR)
+        if 7 <= date_now.hour <= 16:
+            date_now = date_now - datetime.timedelta(hours=16)
+        elif 17 <= date_now.hour <= 23:
+            date_now = date_now - datetime.timedelta(hours=10)
+        else:
+            date_now = None
+        return date_now
+
 
 if __name__ == "__main__":
-    date_str_now = "2017-03-11 12:00:00"
+    # 当前清理的时间。
+    date_str_now = "2017-03-11 7:00:00"
+    clear_date_str = ClearFunction.time_convert(date_str_now).strftime(ClearFunction.DATE_FORMAT_STR)
     try:
         ClearFunction.delete_article(date_str_now)
     finally:

@@ -20,14 +20,14 @@ class XiGuaCrawler(object):
     cookies_dict = {}
 
     # 直接登录后拿到的cookie, 以后需要模拟登录拿数据
-    cookies_str = 'LoginTag=a9c2d09d95da4e668a9730d103fa4ff9; _XIGUASTATE=XIGUASTATEID=b9046bc650534e7bb8325da9000c58ce; ASP.NET_SessionId=n4llk4tgfij3djdbvubjwugm; _XIGUA=UserId=d471a30ba6f3c365&Account=fd0673b157bef6e1f2b65e9f22a7aed8&checksum=4be8ae8c72b3; SaveUserName=18911949659; LV2=1; Big3Biz672571=False; ExploreTags672571=; ShowOneKeyAsyncTip=1; ShowOneKeyAsyncTip2=1; _chl=key=FromBaidu&word=6KW/55Oc; Hm_lvt_72aa476a79cf5b994d99ee60fe6359aa=1519877093,1520314467,1520488035,1520737791; Hm_lpvt_72aa476a79cf5b994d99ee60fe6359aa=1520737791; SERVERID=2e7fd5d7f4caba1a3ae6a9918d4cc9a6|1520752213|1520737796'
+    cookies_str = 'LoginTag=a9c2d09d95da4e668a9730d103fa4ff9; _XIGUASTATE=XIGUASTATEID=b9046bc650534e7bb8325da9000c58ce; ASP.NET_SessionId=n4llk4tgfij3djdbvubjwugm; _XIGUA=UserId=d471a30ba6f3c365&Account=fd0673b157bef6e1f2b65e9f22a7aed8&checksum=4be8ae8c72b3; SaveUserName=18911949659; LV2=1; Big3Biz672571=False; ExploreTags672571=; ShowOneKeyAsyncTip=1; ShowOneKeyAsyncTip2=1; _chl=key=FromBaidu&word=6KW/55Oc; Hm_lvt_72aa476a79cf5b994d99ee60fe6359aa=1519877093,1520314467,1520488035,1520737791; Hm_lpvt_72aa476a79cf5b994d99ee60fe6359aa=1520737791; SERVERID=0a1db1b547a47b70726acefc0225fff8|1520817286|1520817280'
 
     enter_url = "http://zs.xiguaji.com/MArticle/Attention"
 
     tag_article_url = "http://zs.xiguaji.com/MArticle/Attention/?tags=%s&position=2"
 
     # 用来获取每一页的URL，有的标签下只有一页，有的标签下有多页。
-    page_url_format = "http://zs.xiguaji.com/MArticle/Attention/?position=2&dayInterval=1&articleType=-1&tags=%s&onlyTopLine=&page=%d&more=1"
+    page_url_format = "http://zs.xiguaji.com/MArticle/Attention/?position=2&dayInterval=0.08&articleType=-1&tags=%s&onlyTopLine=&page=%d&more=1"
 
     # datInterval 表示时间取值， 1表示最近24小时，0。08表示最近12小时，3表示最近3天
 
@@ -65,6 +65,7 @@ class XiGuaCrawler(object):
             tags_dict[tag_name] = tag_id
         keys = tags_dict.keys()
         for key in keys:
+            print(key)
             XiGuaCrawler.craw_tag(key, tags_dict.get(key), write_sheet)
         write_workbook.save(file_name + ".xls")
 
