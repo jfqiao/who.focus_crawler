@@ -1,9 +1,10 @@
 from bs4 import BeautifulSoup
 import bs4
 import json
+import requests
 
 
-def parse_content(file_path):
+def get_content_from_file(file_path):
     f = open(file_path, "r", encoding="utf-8")
     content = ""
     while 1:
@@ -12,9 +13,12 @@ def parse_content(file_path):
             break
         content += line
     f.close()
+    return content
+
+
+def parse_content(content):
     result = []
     bs_obj = BeautifulSoup(content, "html.parser")
-
     items = bs_obj.descendants
     for item in items:
         if type(item) == bs4.element.NavigableString:
@@ -41,6 +45,16 @@ def parse_content(file_path):
                         continue
             except ValueError:
                 pass
+            width = item.get("data-w")
+            try:
+                if width is not None:
+                    width = int(width.replace("px", ""))
+                    if width < 50:
+                        continue
+            except ValueError:
+                pass
+            style_line = item.get("style")
+
             result.append({"type": "image", "data": src})
         elif item.name == "span":
             if check_parent(item):
@@ -59,5 +73,5 @@ def check_parent(tag):
 
 
 if __name__ == "__main__":
-    path = "/Users/jfqiao/wechat_articles/百页PPT解读 | 2017年中国股权投资市场回顾与展望.html"
-    parse_content(path)
+    r = requests.get("http://mp.weixin.qq.com/s?__biz=MTY3OTM1NTY2MQ==&mid=2654347022&idx=1&sn=478f6a403c02bdeb7e44c5f0298cd007&scene=0#wechat_redirect")
+    parse_content(r.content)
