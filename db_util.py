@@ -14,7 +14,7 @@ class DBUtil(object):
         con = pymysql.connect(host='localhost',
                               port=3306,
                               user='root',
-                              password='1234',
+                              password='qwerty123',
                               db='db_WhoFocus',
                               charset='utf8',
                               cursorclass=pymysql.cursors.DictCursor)
