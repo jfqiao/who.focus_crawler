@@ -18,7 +18,7 @@ def get_content_from_file(file_path):
 
 def parse_content(content):
     result = []
-    bs_obj = BeautifulSoup(content, "html.parser")
+    bs_obj = BeautifulSoup(content.encode("UTF-8"), "html.parser")
     items = bs_obj.descendants
     for item in items:
         if type(item) == bs4.element.NavigableString:
@@ -29,10 +29,10 @@ def parse_content(content):
                 # f.write(item.__str__())
                 if "请输入标题 " in item.get_text():
                     continue
-                result.append({"type": "text", "data": item.__str__()})
+                result.append({"type": "text", "data": item.__str__() + "<br />"})
         elif item.name == "img":
             src = item.get("data-src")
-            if src is None:
+            if src is None or len(src) == 0:
                 src = item.get("src")
             class_list = item.get("class")
             if class_list is not None and "__bg_gif" in item.get("class"):   # 去除掉一些背景gif图片
@@ -53,13 +53,11 @@ def parse_content(content):
                         continue
             except ValueError:
                 pass
-            style_line = item.get("style")
-
             result.append({"type": "image", "data": src})
         elif item.name == "span":
             if check_parent(item):
                 result.append({"type": "text", "data": item.__str__()})
-    print(json.dumps(result))
+    print(json.dumps(result).encode("UTF-8").decode("UTF-8"))
 
 
 def check_parent(tag):
@@ -73,5 +71,5 @@ def check_parent(tag):
 
 
 if __name__ == "__main__":
-    r = requests.get("http://mp.weixin.qq.com/s?__biz=MTY3OTM1NTY2MQ==&mid=2654347022&idx=1&sn=478f6a403c02bdeb7e44c5f0298cd007&scene=0#wechat_redirect")
-    parse_content(r.content)
+    cnt = get_content_from_file("/Users/jfqiao/Desktop/huxiu_test.html")
+    parse_content(cnt)

@@ -80,9 +80,12 @@ class WechatArticleCrawler(object):
         # WechatArticleCrawler.save_file(bs_obj.__str__(), title + ".html")  # 保存源代码
         parse_cnt = WechatArticleCrawler.parse_js_content(js_content)    # 获取转化后的形式
 
-        WechatArticleCrawler.save_file(parse_cnt, url[28:])
+        # WechatArticleCrawler.save_file(parse_cnt, url[28:])
+        cnt_file_name = url.replace("/", "").replace(":", "")
+        WechatArticleCrawler.save_file(parse_cnt, cnt_file_name)
         abstract_cnt = js_content.get_text()[:51].replace("\n", "")   # 获取文章的摘要，并保存摘要
-        WechatArticleCrawler.save_file(abstract_cnt, url[28:] + "_abstract")
+        # WechatArticleCrawler.save_file(abstract_cnt, url[28:] + "_abstract")
+        WechatArticleCrawler.save_file(abstract_cnt, cnt_file_name + "_abstract")
         image_url = re.search(WechatArticleCrawler.pattern, bs_obj.__str__()).group(1)
         return image_url
 
@@ -200,4 +203,4 @@ class WechatArticleCrawler(object):
 
 if __name__ == "__main__":
     sys.setrecursionlimit(100000)
-    WechatArticleCrawler.get_url_and_set("/Users/jfqiao/Desktop/xi_gua_articles/2018-03-12_13-32.xls")
+    WechatArticleCrawler.get_url_and_set("/Users/jfqiao/Desktop/xi_gua_articles/2018-03-15_15-33.xls")
