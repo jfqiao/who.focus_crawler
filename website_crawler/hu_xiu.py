@@ -58,16 +58,19 @@ class HuXiuCrawler(Crawler):
                     self.insert_url(url)
                 page += 1
         except BaseException as e:
-            print(e)
+            print("HuXiu crawl error. ErrMsg: %s" % str(e))
+
+    def insert_line(self, result, item):
+        result.append({"type": "text", "data": item.__str__()})
 
     def get_article_content(self, url):
         resp = requests.get(url, headers=HuXiuCrawler.headers)
         article_html = BeautifulSoup(resp.content, "html.parser")
         article_body = article_html.find("div", class_="article-wrap")
         # 删除文章中不必要的不分
-        article_body.find("h1", class_="t-h1").extract()
-        article_body.find("div", class_="article-author").extract()
-        article_body.find("div", class_="neirong-shouquan").extract()
+        self.extract(article_body.find("h1", class_="t-h1"))
+        self.extract(article_body.find("div", class_="article-author"))
+        self.extract(article_body.find("div", class_="neirong-shouquan"))
         content = self.parse_content(article_body)
         self.save_file(content, url)
 
@@ -100,4 +103,4 @@ class HuXiuCrawler(Crawler):
                 date = datetime.datetime.strptime(date_str, "%Y-%m-%d")
             return date
         except BaseException as e:
-            print("HuXiu crawler error in convert time. Time String : %s" % date_str)
+            print("HuXiu crawler error in convert time. Time String : %s. ErrMsg: %s" % (date_str, str(e)))

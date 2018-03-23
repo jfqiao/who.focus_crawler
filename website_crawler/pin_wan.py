@@ -26,29 +26,35 @@ class PinWanCrawler(Crawler):
 
     def crawl(self):
         try:
-            page = 0  # 虎嗅网是从第0页开始的。
+            page = 0
             while not PinWanCrawler.update_stop:
                 resp = requests.post(url=PinWanCrawler.post_url, data={"paged": page, "action": "my_ajax_allpost_next"})
                 if resp.status_code != 200:
                     continue
                 bs_obj = BeautifulSoup(resp.content, "html.parser")
-                articles_list = bs_obj.findAll("div", class_="mod-b mod-art")  # class 为 mod-b mod-art的为顶层文章div标签
+                articles_list = bs_obj.findAll("div", class_="item")
+                if len(articles_list) == 0:
+                    break
                 for article in articles_list:
-                    article_div = article.find("div", class_="mod-thumb ")  # class 为 mod-thumb 标签下有文章的链接,图片链接
-                    title = article_div.find("a").get_text().replace("\n", "")  # title should not contains new line
-                    url = article_div.find("a").get_href()  # 相对链接
+                    article_div = article.find("div", class_="news-item")
+                    title = article_div.find("h2", class_="title").get_text().replace("\n", "")
+                    url = article_div.find("h2", class_="title").find("a").get("href")
                     select_result = self.select_url(url)
                     if select_result:  # 查看数据库是否已经有该链接
-                        self.update_stop = 1  # 如果有则可以直接停止
-                        continue
-                    image_url = article_div.fin("img").get("data-original")  # 图片标签，地址在data-originalsh属性下
-                    rel_date = article.find("span", class_="time").get_text()
+                        PinWanCrawler.update_stop = 1  # 如果有则可以直接停止
+                        break
+                    image_url = article_div.find("div", class_="news-thumb").get("style")
+                    # 图片标签在style的背景属性中
+                    pos_start = image_url.find("(")
+                    pos_end = image_url.find(")")
+                    image_url = image_url[pos_start + 1: pos_end]
+                    rel_date = article.find("span", class_="time").get_text().replace("• ", "")
                     # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd
                     date = self.convert_date(rel_date)
                     if date < self.target_date:  # 比较文章的发表时间，可以保留特定时间段内的文章
-                        self.update_stop = 1  # 如果文章的发表时间在给定的时间之前，则停止爬虫
-                        continue
-                    label = article.find("a", class_="column-link").get("text")
+                        PinWanCrawler.update_stop = 1  # 如果文章的发表时间在给定的时间之前，则停止爬虫
+                        break
+                    label = "段子"
                     self.get_article_content(url)
                     self.write_data_to_sheet(title, url, image_url, date.strftime("%Y-%m-%d %H:%M"), rel_date,
                                              label, self.origin)
@@ -58,15 +64,14 @@ class PinWanCrawler(Crawler):
             print(e)
 
     def get_article_content(self, url):
-        resp = requests.get(url, headers=HuXiuCrawler.headers)
-        article_html = BeautifulSoup(resp.content, "html.parser")
-        article_body = article_html.find("div", class_="article-wrap")
+        resp = requests.get(url, headers=PinWanCrawler.headers)
+        article_html = BeautifulSoup(resp.content, "lxml")
+        article_body = article_html.find("div", id="sc-container")
         # 删除文章中不必要的不分
-        article_body.find("h1", class_="t-h1").extract()
-        article_body.find("div", class_="article-author").extract()
-        article_body.find("div", class_="neirong-shouquan").extract()
+        self.extract(article_body.find("p", class_="post-footer-wx"))
         content = self.parse_content(article_body)
         self.save_file(content, url)
+        self.save_abstract(article_body, url)
 
     def convert_date(self, date_str):
         """
@@ -97,4 +102,4 @@ class PinWanCrawler(Crawler):
                 date = datetime.datetime.strptime(date_str, "%Y-%m-%d")
             return date
         except BaseException as e:
-            print("HuXiu crawler error in convert time. Time String : %s" % date_str)
+            print("HuXiu crawler error in convert time. Time String : %s, ErrMsg: %s" % (date_str, str(e)))

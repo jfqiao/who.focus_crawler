@@ -4,6 +4,7 @@ import datetime
 import xlwt
 import bs4
 import json
+import requests
 
 from db_util import DBUtil
 
@@ -28,6 +29,8 @@ class Crawler(object):
     article_dir_absolute = ""
 
     excel_result_dir = "/Users/jfqiao/Desktop/write_aritlce_dirs/"         # 保存爬的文章结果excel目录
+
+    image_dir = "/Users/jfqiao/Desktop/image/"
 
     workbook = None
 
@@ -70,8 +73,11 @@ class Crawler(object):
             if not Crawler.is_article_dir_exists:
                 date = datetime.datetime.now()
                 dir_created = date.strftime("%Y/%m/%d/%H_%M/")
+                img_dir_created = date.strftime("%Y-%m-%d_%H-%M")
                 Crawler.article_dir_absolute = Crawler.article_dir_parent + dir_created
+                Crawler.image_dir += img_dir_created
                 os.system("mkdir -p %s" % Crawler.article_dir_absolute)
+                os.system("mkdir -p %s" % Crawler.image_dir)
                 Crawler.is_article_dir_exists = 1
             file_name = url.replace("/", "").replace(":", "")
             f = open(Crawler.article_dir_absolute + "/" + file_name, mode="w", encoding="utf-8")
@@ -81,8 +87,21 @@ class Crawler(object):
             print("Save file error. ErrMsg: %s" % str(e))
 
     @staticmethod
+    def crawl_image_and_save(image_url):
+        # 在调用save_file后，调用此方法用于保存图片。
+        file_name = image_url.replace(":", "").replace("/", "")
+        pos = file_name.find("?")
+        if pos > 0:
+            file_name = file_name[:pos]
+        resp = requests.get(image_url)
+        f = open(Crawler.image_dir + "/" + file_name, "wb")
+        f.write(resp.content)
+        f.close()
+
+    @staticmethod
     def save_abstract(bs_obj, url):
-        content = bs_obj.get_text()[:51]
+        # 对于摘要需要将换行符去掉
+        content = bs_obj.get_text()[:51].replace("\n", "")
         Crawler.save_file(content, url + "_abstract")
 
     def parse_content(self, bs_obj):

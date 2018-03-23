@@ -16,7 +16,9 @@ class DoNewsCrawler(Crawler):
     headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) "
                              "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36"}
 
-    target_date = datetime.datetime.strptime("", "")
+    detail_url = "http://www.donews.com/news/detail/3/%s.html"
+
+    target_date = datetime.datetime.strptime("2018-02-10", "%Y-%m-%d")
 
     def __init__(self):
         self.origin = "DoNews"
@@ -34,7 +36,7 @@ class DoNewsCrawler(Crawler):
                     break
                 for article in articles_list:
                     title = article.get("title")
-                    url = article.get("url")
+                    url = self.detail_url % article.get("source_id")
                     select_result = self.select_url(url)
                     if select_result:  # 查看数据库是否已经有该链接
                         DoNewsCrawler.update_stop = 1  # 如果有则可以直接停止
@@ -48,8 +50,6 @@ class DoNewsCrawler(Crawler):
                         continue
                     label = article.get("tag")
                     self.get_article_content(url)
-                    self.save_abstract(article.get("description"), url)
-
                     self.write_data_to_sheet(title, url, image_url, date.strftime("%Y-%m-%d %H:%M"), rel_date,
                                              label, self.origin)
                     self.insert_url(url)
@@ -63,6 +63,10 @@ class DoNewsCrawler(Crawler):
         article_body = article_html.find("div", class_="article-con")
         content = self.parse_content(article_body)
         self.save_file(content, url)
+        self.save_abstract(article_body, url)
+
+    def insert_line(self, result, item):
+        result.append({"type": "text", "data": item.__str__() + "<br />"})
 
     def convert_date(self, date_str):
         """
@@ -90,7 +94,14 @@ class DoNewsCrawler(Crawler):
             if time_gap is not None:
                 date = datetime.datetime.now() - time_gap
             else:
-                date = datetime.datetime.strptime(date_str, "%Y-%m-%d")
+                date = datetime.datetime.strptime(date_str, "%Y-%m-%d%H:%M:%S")
             return date
         except BaseException as e:
             print("DoNews crawler error in convert time. Time String : %s, ErrMsg: %s" % (date_str, str(e)))
+
+
+if __name__ == "__main__":
+    Crawler.initialize_workbook()
+    dn = DoNewsCrawler()
+    dn.crawl()
+    Crawler.save_workbook()

@@ -1,6 +1,7 @@
 # coding=utf-8
 import requests
 from bs4 import BeautifulSoup
+import bs4
 import datetime
 import json
 
@@ -42,7 +43,9 @@ class JieMianCrawler(Crawler):
                     if select_result:  # 查看数据库是否已经有该链接
                         JieMianCrawler.update_stop = 1  # 如果有则可以直接停止
                         break
-                    image_url = article.find("img").get("src")
+                    image_url = article.find("img").get("src").replace("img1", "").replace("img2", "img").replace("img3", "img")
+                    if "http:" not in image_url:
+                        image_url = "http:" + image_url
                     rel_date = article.find("span", class_="date").get_text()
                     date = self.convert_date(rel_date)
                     if date < self.target_date:  # 比较文章的发表时间，可以保留特定时间段内的文章
@@ -70,6 +73,50 @@ class JieMianCrawler(Crawler):
         content = self.parse_content(article_body)
         self.save_file(content, url)
         self.save_abstract(article_body, url)
+
+    def parse_content(self, bs_obj):
+        result = []
+        items = bs_obj.descendants
+        for item in items:
+            if type(item) == bs4.element.NavigableString:
+                continue
+            # p标签以及对立的span标签都是需要的，但是p标签可能包含span标签
+            if item.name == "p":
+                if item.find("img") is None:
+                    # f.write(item.__str__())
+                    self.insert_line(result, item)
+            elif item.name == "img":
+                src = item.get("data-src")
+                if src is None or len(src) == 0:
+                    src = item.get("src")
+                class_list = item.get("class")
+                if class_list is not None and "__bg_gif" in item.get("class"):  # 去除掉一些背景gif图片
+                    continue
+                width = item.get("width")
+                try:
+                    if width is not None:
+                        width = int(width.replace("px", ""))
+                        if width < 50:
+                            continue
+                except ValueError:
+                    pass
+                width = item.get("data-w")
+                try:
+                    if width is not None:
+                        width = int(width.replace("px", ""))
+                        if width < 50:
+                            continue
+                except ValueError:
+                    pass
+                if "http:" not in src:
+                    src = "http:" + src
+                src = src.replace("img1", "img").replace("img2", "img").replace("img3", "img")
+                result.append({"type": "image", "data": src})
+            elif item.name == "span":
+                if self.check_parent(item):
+                    self.insert_line(result, item)
+                    # result.append({"type": "text", "data": item.__str__()})
+        return json.dumps(result).encode("UTF-8").decode("UTF-8")
 
     def insert_line(self, result, item):
         result.append({"type": "text", "data": item.__str__() + "<br />"})

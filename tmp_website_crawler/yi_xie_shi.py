@@ -147,6 +147,9 @@ class YiXieShiCrawler(Crawler):
                     # result.append({"type": "text", "data": item.__str__()})
         return json.dumps(result).encode("UTF-8").decode("UTF-8")
 
+    def insert_line(self, result, item):
+        result.append({"type": "text", "data": item.__str__() + "<br />"})
+
 
 if __name__ == "__main__":
     Crawler.initialize_workbook()
