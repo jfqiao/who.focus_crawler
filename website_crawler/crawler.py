@@ -32,6 +32,8 @@ class Crawler(object):
 
     image_dir = "/Users/jfqiao/Desktop/image/"
 
+    time_format = "%Y-%m-%d %H:%M"
+
     workbook = None
 
     worksheet = None
@@ -44,6 +46,8 @@ class Crawler(object):
 
     insert_sql = "INSERT INTO t_article_url(url, insert_time) VALUES(\"%s\", \"%s\")"
 
+    target_date = datetime.datetime.strptime("2018-04-02 23:59:59", "%Y-%m-%d %H:%M:%S")
+
     @staticmethod
     def save_workbook():
         date = datetime.datetime.now()
@@ -54,7 +58,7 @@ class Crawler(object):
     def initialize_workbook():
         Crawler.workbook = xlwt.Workbook(encoding="ascii")
         Crawler.worksheet = Crawler.workbook.add_sheet("articles")
-        Crawler.write_data_to_sheet("标题", "链接", "图片链接", "发布时间（相对）", "发布时间（绝对）", "标签", "来源",)
+        Crawler.write_data_to_sheet("标题", "链接", "图片链接", "发布时间（相对）", "发布时间（绝对）", "标签", "来源")
 
     @staticmethod
     def write_data_to_sheet(title, url, image_link, abs_date, rel_date, label, origin):
@@ -86,16 +90,19 @@ class Crawler(object):
         except BaseException as e:
             print("Save file error. ErrMsg: %s" % str(e))
 
-    @staticmethod
-    def crawl_image_and_save(image_url):
+    def crawl_image_and_save(self, image_url):
         # 在调用save_file后，调用此方法用于保存图片。
         file_name = image_url.replace(":", "").replace("/", "")
         pos = file_name.find("?")
         if pos > 0:
             file_name = file_name[:pos]
         resp = requests.get(image_url)
+        content_type = resp.headers.get("Content-Type")
         f = open(Crawler.image_dir + "/" + file_name, "wb")
         f.write(resp.content)
+        f.close()
+        f = open(Crawler.image_dir + "/" + file_name + ".txt", "wt")
+        f.write(content_type)
         f.close()
 
     @staticmethod
@@ -176,7 +183,7 @@ class Crawler(object):
     @staticmethod
     def replace_white_space(src_str):
         if src_str:
-            return src_str.replace(" ", "").replace("\n", "").replace("\t", "")
+            return src_str.replace(" ", "").replace("\n", "").replace("\t", "").replace("\r", "")
         else:
             return ""
 
@@ -189,3 +196,13 @@ class Crawler(object):
     def extract_all(bs_obj_arr):
         if bs_obj_arr:
             [item.extract() for item in bs_obj_arr]
+
+    @staticmethod
+    def reset_image_url(image_url):
+        pos = image_url.find("?")
+        if pos > 0:
+            image_url = image_url[:pos]
+        pos = image_url.find("!")
+        if pos > 0:
+            image_url = image_url[:pos]
+        return image_url

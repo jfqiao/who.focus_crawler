@@ -18,8 +18,6 @@ class PinWanCrawler(Crawler):
     headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) "
                              "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36"}
 
-    target_date = datetime.datetime.strptime("2015-11-06", "%Y-%m-%d")
-
     def __init__(self):
         self.origin = "品玩"
 

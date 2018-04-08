@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import datetime
+import re
 
 from website_crawler.crawler import Crawler
 
@@ -21,41 +22,62 @@ class HuXiuCrawler(Crawler):
     headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) "
                              "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36"}
 
-    target_date = datetime.datetime.strptime("", "")
+    data = {"page": "", "huxiu_hash_code": "", "last_dateline": ""}
 
     def __init__(self):
         self.origin = "虎嗅"
+        self.label = "商业资讯"
 
     def crawl(self):
         try:
-            page = 0                 # 虎嗅网是从第0页开始的。
+            page = 0
             while not HuXiuCrawler.update_stop:
-                resp = requests.post(url=HuXiuCrawler.post_url, data={"page": page})
-                if resp.status_code != 200:
-                    continue
-                data = json.loads(resp.content).get("data")
-                bs_obj = BeautifulSoup(data)
-                articles_list = bs_obj.findAll("div", class_="mod-b mod-art")   # class 为 mod-b mod-art的为顶层文章div标签
+                if page == 0:
+                    url = HuXiuCrawler.huxiu_site_url
+                    resp = requests.get(url, headers=HuXiuCrawler.headers)
+                    content = resp.content
+                else:
+                    url = HuXiuCrawler.post_url
+                    HuXiuCrawler.data["page"] = str(page)
+                    resp = requests.post(url=url, headers=HuXiuCrawler.headers, data=HuXiuCrawler.data)
+                    if resp.status_code != 200:
+                        continue
+                    obj = json.loads(resp.content)
+                    content = obj.get("data")
+                    HuXiuCrawler.data["last_dateline"] = obj.get("last_dateline")
+                bs_obj = BeautifulSoup(content, "lxml")
+                if page == 0:
+                    pattern = re.compile("huxiu_hash_code='(.*)';")
+                    mat_obj = re.search(pattern, bs_obj.find("script", attrs={"type": "text/javascript"}).get_text())
+                    HuXiuCrawler.data["huxiu_hash_code"] = mat_obj.group(1)
+                    date = bs_obj.find("div", attrs={"data-last_dateline": re.compile(".*")})
+                    HuXiuCrawler.data["last_dateline"] = date.get("data-last_dateline")
+                articles_list = bs_obj.findAll("div", attrs={"class": re.compile("mod-b mod-art.*")})
                 for article in articles_list:
-                    article_div = article.find("div", class_="mod-thumb ")      # class 为 mod-thumb 标签下有文章的链接,图片链接
-                    title = article_div.find("a").get_text().replace("\n", "")  # title should not contains new line
-                    url = HuXiuCrawler.huxiu_site_url + article_div.find("a").get_href()  # 相对链接
-                    select_result = self.select_url(url)
-                    if select_result:                                                      # 查看数据库是否已经有该链接
-                        HuXiuCrawler.update_stop = 1                                       # 如果有则可以直接停止
-                        continue
-                    image_url = article_div.fin("img").get("data-original")             # 图片标签，地址在data-originalsh属性下
-                    rel_date = article.find("span", class_="time").get_text()
-                    # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd
-                    date = self.convert_date(rel_date)
-                    if date < HuXiuCrawler.target_date:    # 比较文章的发表时间，可以保留特定时间段内的文章
-                        HuXiuCrawler.update_stop = 1       # 如果文章的发表时间在给定的时间之前，则停止爬虫
-                        continue
-                    label = article.find("a", class_="column-link").get("text")
-                    self.get_article_content(url)
-                    self.write_data_to_sheet(title, url, image_url, date.strftime("%Y-%m-%d %H:%M"), rel_date,
-                                             label, self.origin)
-                    self.insert_url(url)
+                    try:
+                        href = article.find("h2").find("a")
+                        title = href.get_text().replace("\n", "")  # title should not contains new line
+                        url = HuXiuCrawler.huxiu_site_url + href.get("href")  # 相对链接
+                        select_result = self.select_url(url)
+                        if select_result:                                                      # 查看数据库是否已经有该链接
+                            # HuXiuCrawler.update_stop = 1                                       # 如果有则可以直接停止
+                            continue
+                        image_url = article.find("img").get("data-original")             # 图片标签，地址在data-originalsh属性下
+                        rel_date = article.find("span", class_="time").get_text()
+                        # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd
+                        date = self.convert_date(rel_date)
+                        if date < self.target_date:    # 比较文章的发表时间，可以保留特定时间段内的文章
+                            HuXiuCrawler.update_stop = 1       # 如果文章的发表时间在给定的时间之前，则停止爬虫
+                            break
+                        # label = article.find("a", class_="column-link").get("text")
+                        self.get_article_content(url)
+                        self.crawl_image_and_save(image_url)
+                        self.write_data_to_sheet(title, url, image_url, date.strftime("%Y-%m-%d %H:%M"), rel_date,
+                                                 self.label, self.origin)
+                        self.insert_url(url)
+                        print(url)
+                    except BaseException as e:
+                        print("HuXiu crawl error. ErrMsg: %s" % str(e))
                 page += 1
         except BaseException as e:
             print("HuXiu crawl error. ErrMsg: %s" % str(e))
@@ -71,8 +93,11 @@ class HuXiuCrawler(Crawler):
         self.extract(article_body.find("h1", class_="t-h1"))
         self.extract(article_body.find("div", class_="article-author"))
         self.extract(article_body.find("div", class_="neirong-shouquan"))
+        self.extract(article_body.find("div", class_="neirong-shouquan-public"))
+        self.extract(article_body.find("div", class_="Qr-code"))
         content = self.parse_content(article_body)
         self.save_file(content, url)
+        self.save_abstract(article_body, url)
 
     def convert_date(self, date_str):
         """
@@ -104,3 +129,14 @@ class HuXiuCrawler(Crawler):
             return date
         except BaseException as e:
             print("HuXiu crawler error in convert time. Time String : %s. ErrMsg: %s" % (date_str, str(e)))
+
+
+def crawl():
+    hx = HuXiuCrawler()
+    hx.crawl()
+
+
+if __name__ == "__main__":
+    Crawler.initialize_workbook()
+    crawl()
+    Crawler.save_workbook()

@@ -18,7 +18,7 @@ def get_content_from_file(file_path):
 
 def parse_content(content):
     result = []
-    bs_obj = BeautifulSoup(content.encode("UTF-8"), "html.parser")
+    bs_obj = BeautifulSoup(content.encode("UTF-8"), "html.parser").find("body")
     items = bs_obj.descendants
     for item in items:
         if type(item) == bs4.element.NavigableString:
@@ -29,7 +29,7 @@ def parse_content(content):
                 # f.write(item.__str__())
                 if "请输入标题 " in item.get_text():
                     continue
-                result.append({"type": "text", "data": item.__str__() + "<br />"})
+                result.append({"type": "text", "data": item.get_text().replace("\n", "")})
         elif item.name == "img":
             src = item.get("data-src")
             if src is None or len(src) == 0:
@@ -56,7 +56,7 @@ def parse_content(content):
             result.append({"type": "image", "data": src})
         elif item.name == "span":
             if check_parent(item):
-                result.append({"type": "text", "data": item.__str__()})
+                result.append({"type": "text", "data": item.get_text().replace("\n", "")})
     print(json.dumps(result).encode("UTF-8").decode("UTF-8"))
 
 

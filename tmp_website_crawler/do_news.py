@@ -18,7 +18,6 @@ class DoNewsCrawler(Crawler):
 
     detail_url = "http://www.donews.com/news/detail/3/%s.html"
 
-    target_date = datetime.datetime.strptime("2018-02-10", "%Y-%m-%d")
 
     def __init__(self):
         self.origin = "DoNews"

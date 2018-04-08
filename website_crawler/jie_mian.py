@@ -8,9 +8,9 @@ import json
 from website_crawler.crawler import Crawler
 
 
-class JieMianCrawler(Crawler):
+class YuLe(Crawler):
 
-    page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=76&page=%s"
+    page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=63&page=%s"
 
     update_stop = 0  # stop crawler.
 
@@ -19,12 +19,14 @@ class JieMianCrawler(Crawler):
 
     def __init__(self):
         self.origin = "界面"
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=76&page=%s"
+        self.label = "娱乐"
 
     def crawl(self):
         try:
             page = 1
-            while not JieMianCrawler.update_stop:
-                resp = requests.get(url=JieMianCrawler.page_url % page, headers=JieMianCrawler.headers)
+            while not YuLe.update_stop:
+                resp = requests.get(url=YuLe.page_url % page, headers=YuLe.headers)
                 if resp.status_code != 200:
                     continue
                 json_content = resp.content.decode("utf-8")[1:-1]
@@ -34,36 +36,37 @@ class JieMianCrawler(Crawler):
                 if len(articles_list) == 0:
                     break
                 for article in articles_list:
-                    href = article.find("h3").find("a")
-                    title = href.get_text().replace("\n", "")
-                    url = href.get("href")
-                    select_result = self.select_url(url)
-                    if select_result:  # 查看数据库是否已经有该链接
-                        JieMianCrawler.update_stop = 1  # 如果有则可以直接停止
-                        break
-                    image_url = article.find("img").get("src").replace("img1", "").replace("img2", "img").replace("img3", "img")
-                    if "http:" not in image_url:
-                        image_url = "http:" + image_url
-                    rel_date = article.find("span", class_="date").get_text()
-                    date = self.convert_date(rel_date)
-                    if date < self.target_date:  # 比较文章的发表时间，可以保留特定时间段内的文章
-                        JieMianCrawler.update_stop = 1  # 如果文章的发表时间在给定的时间之前，则停止爬虫
-                        break
-                    label = article.find("span", class_="author").find("a")
-                    if label:
-                        label = label.get_text()
-                    else:
-                        label = "娱乐圈"
-                    self.get_article_content(url)
-                    self.write_data_to_sheet(title, url, image_url, date.strftime("%Y-%m-%d %H:%M"), rel_date,
-                                             label, self.origin)
-                    self.insert_url(url)
+                    try:
+                        href = article.find("h3").find("a")
+                        title = href.get_text().replace("\n", "")
+                        url = href.get("href")
+                        select_result = self.select_url(url)
+                        if select_result:  # 查看数据库是否已经有该链接
+                            # YuLe.update_stop = 1  # 如果有则可以直接停止
+                            continue
+                        image_url = article.find("img").get("src").replace("img1", "img").replace("img2", "img")\
+                            .replace("img3", "img")
+                        if "http:" not in image_url:
+                            image_url = "http:" + image_url
+                        rel_date = article.find("span", class_="date").get_text()
+                        date = self.convert_date(rel_date)
+                        if date < self.target_date:  # 比较文章的发表时间，可以保留特定时间段内的文章
+                            YuLe.update_stop = 1  # 如果文章的发表时间在给定的时间之前，则停止爬虫
+                            break
+                        self.get_article_content(url)
+                        self.crawl_image_and_save(image_url)
+                        self.write_data_to_sheet(title, url, image_url, date.strftime("%Y-%m-%d %H:%M"), rel_date,
+                                                 self.label, self.origin)
+                        self.insert_url(url)
+                        print(url)
+                    except BaseException as e:
+                        print("JieMian crawl error. ErrMsg:%s" % str(e))
                 page += 1
         except BaseException as e:
             print("JieMian crawl error. ErrMsg:%s" % str(e))
 
     def get_article_content(self, url):
-        resp = requests.get(url, headers=JieMianCrawler.headers)
+        resp = requests.get(url, headers=YuLe.headers)
         article_html = BeautifulSoup(resp.content, "html.parser")
         article_body = article_html.find("div", class_="article-main")
         # 删除文章中不必要的不分
@@ -151,8 +154,118 @@ class JieMianCrawler(Crawler):
             print("JieMain crawler error in convert time. Time String : %s. ErrMsg: %s" % (date_str, str(e)))
 
 
+class HongGuan(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=174&page=%s"
+        self.label = "财经新闻"
+
+
+class TiYu(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=82&page=%s"
+        self.label = "体育"
+
+
+class ShiShang(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=68&page=%s"
+        self.label = "时尚"
+
+
+class WenHua(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=130&page=%s"
+        self.label = "读书"
+
+
+class YouXi(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=118&page=%s"
+        self.label = "游戏"
+
+
+class ShuJu(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=154&page=%s"
+        self.label = "商业资讯"
+
+
+class KeJi(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=65&page=%s"
+        self.label = "科技"
+
+
+class ZhengQuan(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=112&page=%s"
+        self.label = "财经新闻"
+
+
+class JinRong(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=9&page=%s"
+        self.label = "商业资讯"
+
+
+class XiaoFei(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=31&page=%s"
+        self.label = "著名公司"
+
+
+class YingXiao(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=49&page=%s"
+        self.label = "商业资讯"
+
+
+class GuanLi(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=139&page=%s"
+        self.label = "商业观点"
+
+
+class ChuangYe(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=141&page=%s"
+        self.label = "创业干货"
+
+        
+def crawl():
+    items = [YuLe(), HongGuan(), TiYu(), ShiShang(), WenHua(), YouXi(), ShuJu(), KeJi(), ZhengQuan(), JinRong(),
+             XiaoFei(), YingXiao(), GuanLi(), ChuangYe()]
+    for item in items:
+        item.crawl()
+
+
 if __name__ == "__main__":
     Crawler.initialize_workbook()
-    jm = JieMianCrawler()
-    jm.crawl()
+    crawl()
     Crawler.save_workbook()

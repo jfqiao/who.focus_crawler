@@ -203,4 +203,4 @@ class WechatArticleCrawler(object):
 
 if __name__ == "__main__":
     sys.setrecursionlimit(100000)
-    WechatArticleCrawler.get_url_and_set("/Users/jfqiao/Desktop/xi_gua_articles/2018-03-15_15-33.xls")
+    WechatArticleCrawler.get_url_and_set("/Users/jfqiao/Desktop/xi_gua_articles/2018-04-08_11-11.xls")
