@@ -27,7 +27,7 @@ class JiKeGuanCha(Crawler):
             while not JiKeGuanCha.update_stop:
                 resp = requests.get(url=self.page_url % page)
                 if resp.status_code != 200:
-                    continue
+                    break
                 bs_obj = BeautifulSoup(resp.content, "html.parser")
                 articles_list = bs_obj.findAll("li", class_="textstyle")
                 if len(articles_list) == 0:
@@ -39,8 +39,8 @@ class JiKeGuanCha(Crawler):
                         url = href.get("href")
                         select_result = self.select_url(url)
                         if select_result:  # 查看数据库是否已经有该链接
-                            # JiKeGuanCha.update_stop = 1  # 如果有则可以直接停止
-                            continue
+                            JiKeGuanCha.update_stop = 1  # 如果有则可以直接停止
+                            break
                         rel_date = article.find("span", class_="date").get_text()
                         # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd
                         date = self.convert_date(rel_date)

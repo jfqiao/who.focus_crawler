@@ -27,7 +27,7 @@ class YiXieShiGanHuo(Crawler):
             while not YiXieShiGanHuo.update_stop:
                 resp = requests.get(url=self.page_url % page, headers=YiXieShiGanHuo.headers)
                 if resp.status_code != 200:
-                    continue
+                    break
                 bs_obj = BeautifulSoup(resp.content, "html.parser")
                 articles_list = bs_obj.findAll("div", attrs={"class": re.compile("article-box clearfix excerpt-\d+")})
                 if len(articles_list) == 0:
@@ -39,8 +39,8 @@ class YiXieShiGanHuo(Crawler):
                         url = href.find("a").get("href")
                         select_result = self.select_url(url)
                         if select_result:  # 查看数据库是否已经有该链接
-                            # YiXieShiGanHuo.update_stop = 1  # 如果有则可以直接停止
-                            continue
+                            YiXieShiGanHuo.update_stop = 1  # 如果有则可以直接停止
+                            break
                         image_url = article.find("img").get("src")
                         rel_date = article.find("time", class_="item").get_text()
                         date = self.convert_date(rel_date)

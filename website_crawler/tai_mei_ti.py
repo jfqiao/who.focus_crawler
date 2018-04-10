@@ -26,7 +26,7 @@ class DaGongSi(Crawler):
             while not DaGongSi.update_stop:
                 resp = requests.get(url=self.page_url % page, headers=DaGongSi.headers)
                 if resp.status_code != 200:
-                    continue
+                    break
                 bs_obj = BeautifulSoup(resp.content, "html.parser")
                 articles_list = bs_obj.find("div", class_="mod-article-list clear").findAll("li")
                 if len(articles_list) == 0:
@@ -38,8 +38,8 @@ class DaGongSi(Crawler):
                         url = DaGongSi.site_url + href.get("href")
                         select_result = self.select_url(url)
                         if select_result:  # 查看数据库是否已经有该链接
-                            # DaGongSi.update_stop = 1  # 如果有则可以直接停止
-                            continue
+                            DaGongSi.update_stop = 1  # 如果有则可以直接停止
+                            break
                         image_url = article.find("img").get("src")
                         rel_date = article.find("span", class_="author")
                         self.extract(rel_date.find("a"))

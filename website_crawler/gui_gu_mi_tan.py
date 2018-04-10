@@ -35,7 +35,7 @@ class GuiGuMiTan(Crawler):
             while not GuiGuMiTan.update_stop:
                 resp = requests.get(url=self.page_url % page)
                 if resp.status_code != 200:
-                    continue
+                    break
                 bs_obj = BeautifulSoup(resp.content, "html.parser")
                 articles_list = bs_obj.findAll("div", class_="row underline")
                 if len(articles_list) == 0:
@@ -47,8 +47,8 @@ class GuiGuMiTan(Crawler):
                         url = GuiGuMiTan.site_url + href.get("href")
                         select_result = self.select_url(url)
                         if select_result:  # 查看数据库是否已经有该链接
-                            # GuiGuMiTan.update_stop = 1  # 如果有则可以直接停止
-                            continue
+                            GuiGuMiTan.update_stop = 1  # 如果有则可以直接停止
+                            break
                         image_url = article.find("p", class_="image").get("style")
                         start = image_url.find("(")
                         end = image_url.find(")")

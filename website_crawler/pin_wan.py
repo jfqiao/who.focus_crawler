@@ -27,7 +27,7 @@ class PinWanCrawlerDuanZi(Crawler):
             while not PinWanCrawlerDuanZi.update_stop:
                 resp = requests.get(url=self.page_url % page, headers=PinWanCrawlerDuanZi.headers)
                 if resp.status_code != 200:
-                    continue
+                    break
                 bs_obj = BeautifulSoup(resp.content, "html.parser")
                 articles_list = bs_obj.findAll("div", class_="item")
                 if len(articles_list) == 0:

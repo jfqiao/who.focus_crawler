@@ -30,7 +30,7 @@ class GongSi(Crawler):
             while not GongSi.update_stop:
                 resp = requests.get(url=self.page_url % page)
                 if resp.status_code != 200:
-                    continue
+                    break
                 result = json.loads(resp.content, encoding="UTF-8")
                 articles_list = result.get("data").get("items")
                 if len(articles_list) == 0:
@@ -43,8 +43,8 @@ class GongSi(Crawler):
                         url = article.get("uri")
                         select_result = self.select_url(url)
                         if select_result:  # 查看数据库是否已经有该链接
-                            # GongSi.update_stop = 1  # 如果有则可以直接停止
-                            continue
+                            GongSi.update_stop = 1  # 如果有则可以直接停止
+                            break
                         image_url = article.get("image_uri")
                         rel_date = article.get("display_time")
                         date = self.convert_date(rel_date)

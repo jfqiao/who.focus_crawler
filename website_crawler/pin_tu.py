@@ -33,7 +33,7 @@ class LingShouQianYan(Crawler):
                 self.data["pageNumber"] = page
                 resp = requests.post(self.page_url, data=self.data)
                 if resp.status_code != 200:
-                    continue
+                    break
                 articles_list = json.loads(resp.content)
                 if len(articles_list) == 0:
                     break
@@ -43,8 +43,8 @@ class LingShouQianYan(Crawler):
                         url = LingShouQianYan.article_detail_url % article.get("id")
                         select_result = self.select_url(url)
                         if select_result:  # 查看数据库是否已经有该链接
-                            # LingShouQianYan.update_stop = 1  # 如果有则可以直接停止
-                            continue
+                            LingShouQianYan.update_stop = 1  # 如果有则可以直接停止
+                            break
                         image_url = article.get("imgUrl")
                         rel_date = article.get("onlineTime")
                         # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd

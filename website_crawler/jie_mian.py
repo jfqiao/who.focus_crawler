@@ -28,7 +28,7 @@ class YuLe(Crawler):
             while not YuLe.update_stop:
                 resp = requests.get(url=YuLe.page_url % page, headers=YuLe.headers)
                 if resp.status_code != 200:
-                    continue
+                    break
                 json_content = resp.content.decode("utf-8")[1:-1]
                 json_obj = json.loads(json_content)
                 bs_obj = BeautifulSoup(json_obj.get("rst"), "html.parser")
@@ -42,8 +42,8 @@ class YuLe(Crawler):
                         url = href.get("href")
                         select_result = self.select_url(url)
                         if select_result:  # 查看数据库是否已经有该链接
-                            # YuLe.update_stop = 1  # 如果有则可以直接停止
-                            continue
+                            YuLe.update_stop = 1  # 如果有则可以直接停止
+                            break
                         image_url = article.find("img").get("src").replace("img1", "img").replace("img2", "img")\
                             .replace("img3", "img")
                         if "http:" not in image_url:

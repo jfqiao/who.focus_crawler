@@ -29,7 +29,7 @@ class ZaoQiXiangMu(Crawler):
             while not ZaoQiXiangMu.update_stop:
                 resp = requests.get(url=self.page_url % page)
                 if resp.status_code != 200:
-                    continue
+                    break
                 bs_obj = BeautifulSoup(resp.content, "html.parser")
                 articles_list = bs_obj.findAll("div", class_="article-bar clearfix")
                 if len(articles_list) == 0:
@@ -41,8 +41,8 @@ class ZaoQiXiangMu(Crawler):
                         url = ZaoQiXiangMu.site_url + href.get("href")
                         select_result = self.select_url(url)
                         if select_result:  # 查看数据库是否已经有该链接
-                            # ZaoQiXiangMu.update_stop = 1  # 如果有则可以直接停止
-                            continue                      # 有可能有的标签下有相同的文章，因此不用记录即可。以时间作为停止标准
+                            ZaoQiXiangMu.update_stop = 1  # 如果有则可以直接停止
+                            break                      # 有可能有的标签下有相同的文章，因此不用记录即可。以时间作为停止标准
                         image_url = article.find("img").get("src")
                         rel_date = article.find("span", class_="timestamp").get_text()
                         # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd

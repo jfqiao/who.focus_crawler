@@ -41,7 +41,7 @@ class HuXiuCrawler(Crawler):
                     HuXiuCrawler.data["page"] = str(page)
                     resp = requests.post(url=url, headers=HuXiuCrawler.headers, data=HuXiuCrawler.data)
                     if resp.status_code != 200:
-                        continue
+                        break
                     obj = json.loads(resp.content)
                     content = obj.get("data")
                     HuXiuCrawler.data["last_dateline"] = obj.get("last_dateline")
@@ -60,8 +60,8 @@ class HuXiuCrawler(Crawler):
                         url = HuXiuCrawler.huxiu_site_url + href.get("href")  # 相对链接
                         select_result = self.select_url(url)
                         if select_result:                                                      # 查看数据库是否已经有该链接
-                            # HuXiuCrawler.update_stop = 1                                       # 如果有则可以直接停止
-                            continue
+                            HuXiuCrawler.update_stop = 1                                       # 如果有则可以直接停止
+                            break
                         image_url = article.find("img").get("data-original")             # 图片标签，地址在data-originalsh属性下
                         rel_date = article.find("span", class_="time").get_text()
                         # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd

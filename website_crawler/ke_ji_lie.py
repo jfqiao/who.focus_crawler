@@ -33,7 +33,7 @@ class KeJiLie(Crawler):
             while not KeJiLie.update_stop:
                 resp = requests.get(url=self.page_url % page)
                 if resp.status_code != 200:
-                    continue
+                    break
                 bs_obj = BeautifulSoup(resp.content, "html.parser")
                 articles_list = bs_obj.findAll("li", class_="am-g am-list-item-desced am_list_li")
                 if len(articles_list) == 0:
@@ -46,8 +46,8 @@ class KeJiLie(Crawler):
                         url = href.get("href")
                         select_result = self.select_url(url)
                         if select_result:  # 查看数据库是否已经有该链接
-                            # KeJiLie.update_stop = 1  # 如果有则可以直接停止
-                            continue
+                            KeJiLie.update_stop = 1  # 如果有则可以直接停止
+                            break
                         image_url = article.find("img")
                         if image_url is None:
                             continue

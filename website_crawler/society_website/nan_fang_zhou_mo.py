@@ -24,7 +24,7 @@ class WenHua(Crawler):
 
     def crawl(self):
         try:
-            page = 1
+            page = 0
             while not WenHua.update_stop:
                 resp = requests.get(url=self.page_url % page)
                 if resp.status_code != 200:
@@ -40,15 +40,17 @@ class WenHua(Crawler):
                         url = href.get("href")
                         select_result = self.select_url(url)
                         if select_result:  # 查看数据库是否已经有该链接
-                            # WenHua.update_stop = 1  # 如果有则可以直接停止
-                            continue
+                            WenHua.update_stop = 1  # 如果有则可以直接停止
+                            break
                         image_url = article.find("img").get("src")
                         rel_date = article.find("p", class_="articleInfo").get_text()
+                        pos = rel_date.find(str(b'\xc2\xa0', encoding="utf-8"))
+                        rel_date = rel_date[pos + 2:]
                         # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd
                         date = self.convert_date(rel_date)
-                        if date < self.target_date:  # 比较文章的发表时间，可以保留特定时间段内的文章
-                            WenHua.update_stop = 1  # 如果文章的发表时间在给定的时间之前，则停止爬虫
-                            break
+                        # if date < self.target_date:  # 比较文章的发表时间，可以保留特定时间段内的文章
+                        #     WenHua.update_stop = 1  # 如果文章的发表时间在给定的时间之前，则停止爬虫
+                        #     break
                         date_str = date.strftime(Crawler.time_format)
                         self.get_article_content(url)
                         self.crawl_image_and_save(image_url)
@@ -67,11 +69,8 @@ class WenHua(Crawler):
     def get_article_content(self, url):
         resp = requests.get(url)
         article_html = BeautifulSoup(resp.content, "lxml")
-        article_body = article_html.find("div", class_="article-content")
+        article_body = article_html.find("section", id="articleContent")
         # 删除文章中不必要的不分
-        self.extract(article_body.find("div", class_="article-footer-ad"))
-        self.extract(article_body.find("p", class_="p1"))
-        self.extract(article_body.find("iframe"))
         content = self.parse_content(article_body)
         self.save_file(content, url)
         self.save_abstract(article_body, url)
@@ -79,10 +78,8 @@ class WenHua(Crawler):
     @staticmethod
     def convert_date(date_str):
         try:
-            seconds = float(date_str)
-            data_time = time.localtime(seconds)
-            date = time.strftime(Crawler.time_format, data_time)
-            date = datetime.datetime.strptime(date, Crawler.time_format)
+            time_format = "%Y-%m-%d %H:%M:%S"
+            date = datetime.datetime.strptime(date_str, time_format)
             return date
         except BaseException as e:
             print("Convert time error in WenHua. ErrMsg: %s" % str(e))
@@ -94,8 +91,8 @@ def crawl():
 
 
 if __name__ == "__main__":
-    Crawler.initialize_workbook()
+    # Crawler.initialize_workbook()
     crawl()
-    Crawler.save_workbook()
+    # Crawler.save_workbook()
 
 

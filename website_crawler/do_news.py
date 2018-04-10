@@ -28,7 +28,7 @@ class ShangYe(Crawler):
             while not ShangYe.update_stop:
                 resp = requests.get(url=self.page_url % page, headers=ShangYe.headers)
                 if resp.status_code != 200:
-                    continue
+                    break
                 # do-news get json result
                 articles_list = json.loads(resp.content)
                 if len(articles_list) == 0:
@@ -39,8 +39,8 @@ class ShangYe(Crawler):
                         url = self.detail_url % article.get("source_id")
                         select_result = self.select_url(url)
                         if select_result:  # 查看数据库是否已经有该链接
-                            # ShangYe.update_stop = 1  # 如果有则可以直接停止
-                            continue
+                            ShangYe.update_stop = 1  # 如果有则可以直接停止
+                            break
                         image_url = article.get("pic")
                         rel_date = article.get("pubtime")
                         # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd
@@ -103,6 +103,8 @@ class ShangYe(Crawler):
             return date
         except BaseException as e:
             print("DoNews crawler error in convert time. Time String : %s, ErrMsg: %s" % (date_str, str(e)))
+            date = datetime.datetime.strptime(date_str, "%Y-%m-%d")
+            return date
 
 
 class ChuangYe(ShangYe):
@@ -119,7 +121,7 @@ class ChuangYe(ShangYe):
             while not ShangYe.update_stop:
                 resp = requests.get(url=self.page_url % page, headers=ShangYe.headers)
                 if resp.status_code != 200:
-                    continue
+                    break
                 # do-news get json result
                 articles_list = json.loads(resp.content)
                 if len(articles_list) == 0:
@@ -129,8 +131,8 @@ class ChuangYe(ShangYe):
                     url = self.detail_url % article.get("source_id")
                     select_result = self.select_url(url)
                     if select_result:  # 查看数据库是否已经有该链接
-                        # ShangYe.update_stop = 1  # 如果有则可以直接停止
-                        continue
+                        ShangYe.update_stop = 1  # 如果有则可以直接停止
+                        break
                     image_url = article.get("pic")
                     rel_date = article.get("timeFormat")
                     # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd
@@ -199,7 +201,7 @@ class KeJi(ChuangYe):
             while not ShangYe.update_stop:
                 resp = requests.get(url=self.page_url % page, headers=ShangYe.headers)
                 if resp.status_code != 200:
-                    continue
+                    break
                 # do-news get json result
                 articles_list = json.loads(resp.content)
                 if len(articles_list) == 0:
@@ -209,8 +211,8 @@ class KeJi(ChuangYe):
                     url = self.detail_url % article.get("id")
                     select_result = self.select_url(url)
                     if select_result:  # 查看数据库是否已经有该链接
-                        # ShangYe.update_stop = 1  # 如果有则可以直接停止
-                        continue
+                        ShangYe.update_stop = 1  # 如果有则可以直接停止
+                        break
                     image_url = article.get("pic")
                     rel_date = article.get("timeFormat")
                     # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd
@@ -254,6 +256,8 @@ class KeJi(ChuangYe):
             return date
         except BaseException as e:
             print("DoNews crawler error in convert time. Time String : %s, ErrMsg: %s" % (date_str, str(e)))
+            date = datetime.datetime.strptime(date_str, "%Y-%m-%d")
+            return date
 
 
 def crawl():

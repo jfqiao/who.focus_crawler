@@ -22,15 +22,17 @@ class Crawler(object):
     3. Crawler保存workbook
     """
 
+    base_dir = "/Users/jfqiao/Desktop/"
+
     is_article_dir_exists = 0     # 针对保存爬的文章的文件夹是否存在的标志，默认文件夹不存在，需要创建
 
-    article_dir_parent = "/Users/jfqiao/Desktop/wechat_articles/"       # 保存文章的根目录，
+    article_dir_parent =  base_dir + "wechat_articles/"       # 保存文章的根目录，
 
     article_dir_absolute = ""
 
-    excel_result_dir = "/Users/jfqiao/Desktop/write_aritlce_dirs/"         # 保存爬的文章结果excel目录
+    excel_result_dir = base_dir + "write_aritlce_dirs/"         # 保存爬的文章结果excel目录
 
-    image_dir = "/Users/jfqiao/Desktop/image/"
+    image_dir = base_dir + "image/"
 
     time_format = "%Y-%m-%d %H:%M"
 
@@ -46,12 +48,19 @@ class Crawler(object):
 
     insert_sql = "INSERT INTO t_article_url(url, insert_time) VALUES(\"%s\", \"%s\")"
 
-    target_date = datetime.datetime.strptime("2018-04-02 23:59:59", "%Y-%m-%d %H:%M:%S")
+    target_date = datetime.datetime.strptime("2018-04-09 23:59:59", "%Y-%m-%d %H:%M:%S")
+
+    write_file_path = ""
+
+    write_image_path = ""
+
+    write_article_path = ""
 
     @staticmethod
     def save_workbook():
         date = datetime.datetime.now()
         file_name = date.strftime(Crawler.excel_file_name_pattern) + ".xls"
+        Crawler.write_file_path = Crawler.excel_result_dir + file_name
         Crawler.workbook.save(Crawler.excel_result_dir + file_name)
 
     @staticmethod
@@ -79,9 +88,11 @@ class Crawler(object):
                 dir_created = date.strftime("%Y/%m/%d/%H_%M/")
                 img_dir_created = date.strftime("%Y-%m-%d_%H-%M")
                 Crawler.article_dir_absolute = Crawler.article_dir_parent + dir_created
-                Crawler.image_dir += img_dir_created
+                image_dir = Crawler.image_dir + img_dir_created
+                Crawler.write_image_path = image_dir
+                Crawler.write_article_path = Crawler.article_dir_absolute
                 os.system("mkdir -p %s" % Crawler.article_dir_absolute)
-                os.system("mkdir -p %s" % Crawler.image_dir)
+                os.system("mkdir -p %s" % image_dir)
                 Crawler.is_article_dir_exists = 1
             file_name = url.replace("/", "").replace(":", "")
             f = open(Crawler.article_dir_absolute + "/" + file_name, mode="w", encoding="utf-8")
@@ -98,10 +109,10 @@ class Crawler(object):
             file_name = file_name[:pos]
         resp = requests.get(image_url)
         content_type = resp.headers.get("Content-Type")
-        f = open(Crawler.image_dir + "/" + file_name, "wb")
+        f = open(Crawler.write_image_path + "/" + file_name, "wb")
         f.write(resp.content)
         f.close()
-        f = open(Crawler.image_dir + "/" + file_name + ".txt", "wt")
+        f = open(Crawler.write_image_path + "/" + file_name + ".txt", "wt")
         f.write(content_type)
         f.close()
 

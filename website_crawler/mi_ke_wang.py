@@ -28,7 +28,7 @@ class YeJieZiXun(Crawler):
             while not YeJieZiXun.update_stop:
                 resp = requests.get(url=self.page_url % page)
                 if resp.status_code != 200:
-                    continue
+                    break
                 bs_obj = BeautifulSoup(resp.content, "html.parser")
                 articles_list = bs_obj.find("div", id="content").findAll("div", attrs={"id": re.compile("post-\d+")})
                 if len(articles_list) == 0:
@@ -41,8 +41,8 @@ class YeJieZiXun(Crawler):
                         url = href.get("href")
                         select_result = self.select_url(url)
                         if select_result:  # 查看数据库是否已经有该链接
-                            # YeJieZiXun.update_stop = 1  # 如果有则可以直接停止
-                            continue
+                            YeJieZiXun.update_stop = 1  # 如果有则可以直接停止
+                            break
                         image_url = article.find("img").get("src")
                         rel_date = article.find("div", class_="entry-meta").get_text()
                         pos = rel_date.find(" ")
