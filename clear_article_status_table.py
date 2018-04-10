@@ -45,11 +45,12 @@ class ClearFunction(object):
             file_path = ClearFunction.article_path + item["url"].replace(":", "").replace("/", "")
             os.system("rm -rf \"%s*\"" % file_path)     # 删除文章和摘要
             file_path = ClearFunction.image_path + item["image_url"].replace(":", "").replace("/", "")
-            child = pexpect.spawn("sudo rm -rf \"%s*\"" % file_path)       # 删除图片
-            child.waitnoecho()
-            child.sendline("jfq19940210")
-            child.waitnoecho()
-            child.kill(0)
+            os.system("echo jfq19940210 | sudo -S rm -rf \"%s*\"" % file_path)
+            # child = pexpect.spawn("sudo rm -rf \"%s*\"" % file_path)       # 删除图片
+            # child.waitnoecho()
+            # child.sendline("jfq19940210")
+            # child.waitnoecho()
+            # child.kill(0)
 
     @staticmethod
     def close_db_conn():

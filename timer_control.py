@@ -12,6 +12,10 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+import paramiko
+from paramiko import SSHClient
+from scp import SCPClient
+
 from website_crawler import chan_pin_jing_li
 from website_crawler import chuang_ye_bang
 from website_crawler import do_news
@@ -32,18 +36,26 @@ from website_crawler import xiao_bai_chuang_ye
 
 from website_crawler.crawler import Crawler
 
+# host = "118.190.201.165"
+
+host = "39.107.69.102"
+
+user = "jfqiao"
+
+password = "jfq19940210"
+
 
 def wechat_article_crawler():
     sys.setrecursionlimit(100000)
     XiGuaCrawler.xi_gua_crawl()
     WechatArticleCrawler.get_url_and_set(XiGuaCrawler.file_path)
-    os.system("tar -czvf result1.tar.gz %s" % WechatArticleCrawler.article_dir)
-    child = pexpect.spawn("scp result1.tar.gz jfqiao@118.190.201.165:/home/jfqiao/result/")
-    child.waitnoecho()
-    child.sendline("jfq19940210")
-    child.waitnoecho()
-    child.kill(0)
-    os.system("rm -rf result1.tar.gz")
+    path_dir, target_dir = get_dir(WechatArticleCrawler.article_dir)
+    os.chdir(path_dir)
+    os.system("tar -czvf result1.tar.gz \"%s\"" % target_dir)
+    src = path_dir + "/result1.tar.gz"
+    target = "/home/jfqiao/result/"
+    transfer_file(src, target, host, user, password)
+    os.system("rm -rf %s/result1.tar.gz" % path_dir)
     send_mail(WechatArticleCrawler.wechat_article_result_path)
 
 # def send_email():
@@ -146,45 +158,66 @@ def website_crawler():
     xiao_bai_chuang_ye.crawl()
     Crawler.save_workbook()
     Crawler.is_article_dir_exists = 0   # 设置状态为0，下次启动时重新创建文件夹
-
     send_mail(Crawler.write_file_path)
-    os.system("tar -czvf result2.tar.gz %s" % Crawler.write_article_path)
-    os.system("tar -czvf result3.tar.gz %s" % Crawler.write_image_path)
-    child = pexpect.spawn("scp result2.tar.gz jfqiao@118.190.201.165:/home/jfqiao/result/")
-    child.waitnoecho()
-    child.sendline("jfq19940210")
-    child.waitnoecho()
-    child.kill(0)
-    child = pexpect.spawn("scp result3.tar.gz jfqiao@118.190.201.165:/home/jfqiao/result/")
-    child.waitnoecho()
-    child.sendline("jfq19940210")
-    child.waitnoecho()
-    child.kill(0)
+    article_path_dir, article_target_dir = get_dir(Crawler.write_article_path)
+    os.chdir(article_path_dir)
+    os.system("tar -czvf result2.tar.gz %s" % article_target_dir)
+    src = article_path_dir + "/result2.tar.gz"
+    target = "/home/jfqiao/result/"
+    transfer_file(src, target, host, user, password)
+    os.system("rm -rf %s/result2.tar.gz" % article_path_dir)
+    image_path_dir, image_target_dir = get_dir(Crawler.write_image_path)
+    os.chdir(image_path_dir)
+    os.system("tar -czvf result3.tar.gz %s" % image_target_dir)
+    src = image_path_dir + "/result3.tar.gz"
+    transfer_file(src, target, host, user, password)
+    os.system("rm -rf %s/result3.tar.gz" % image_path_dir)
 
 
 def server_deal_with_articles():
-    child = pexpect.spawn("ssh jfqiao@118.190.201.165")
-    child.waitnoecho()
-    child.sendline("jfq19940210")
-    child.waitnoecho()
-    child.sendline("py tar_and_move.py")
-    child.waitnoecho()
-    child.kill(0)
+    ssh = SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(host, 22, user, password)
+    ssh.exec_command("py /home/jfqiao/project/who.focus_crawler/tar_and_move.py")
+    ssh.close()
 
 
 def timer():
-    time_to_crawl = [9, 11, 13, 14, 17, 19, 20, 21, 22, 23, 24]
+    time_to_crawl = [0, 9, 11, 13, 14, 17, 19, 20, 21, 22, 23, 24]
     while 1:
         now = datetime.datetime.now()
         if now.hour in time_to_crawl:
             wechat_article_crawler()
             website_crawler()
             time.sleep(3000)      # 预留10分钟用于爬虫时间
-            if now.hour == 9:
+            if now.hour == 24 or now.hour == 0:
                 time_gap = datetime.timedelta(days=1)
                 Crawler.target_date = now - time_gap              # 重置网站爬虫时间
+        # print(now.second)
         time.sleep(1)
 
 
+def get_dir(path):
+    if path.endswith("/"):
+        path = path[:-1]
+    pos = path.rfind("/")
+    path_dir = path[:pos]
+    target_dir = path[pos + 1:]
+    return path_dir, target_dir
+
+
+def transfer_file(src, target, host_para, user_para, password_para):
+    ssh = SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(host_para, 22, user_para, password_para)
+    # SCPCLient takes a paramiko transport as its only argument
+    scp = SCPClient(ssh.get_transport())
+    scp.put(src, target)
+    scp.close()
+    ssh.close()
+
+
 if __name__ == "__main__":
-    timer()
+    wechat_article_crawler()
+    website_crawler()
+    server_deal_with_articles()
