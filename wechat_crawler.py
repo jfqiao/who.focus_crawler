@@ -11,16 +11,20 @@ import re
 import os
 import sys
 
+from website_crawler.crawler import Crawler
+
 
 class WechatArticleCrawler(object):
 
     pattern = "var msg_cdn_url = \"(.*)\";"
 
     # 获取到图片地址后，文章信息保存的目录。
-    write_dir = "/Users/jfqiao/Desktop/write_aritlce_dirs/"
+    write_dir = Crawler.base_dir + "write_aritlce_dirs/"
 
     # 爬取微信文章内容保存的目录,以月份_日期作为文件夹的名称。
-    article_dir = "/Users/jfqiao/Desktop/wechat_articles_dir/%s/"
+    article_dir = ""
+
+    article_dir_format = Crawler.base_dir + "wechat_articles_dir/%s/"
 
     search_url_format = "http://weixin.sogou.com/weixin?type=2&s_from=input&query=%s"
 
@@ -34,6 +38,8 @@ class WechatArticleCrawler(object):
                "Upgrade-Insecure-Requests": "1",
                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36"
                }
+
+    wechat_article_result_path = ""
 
     @staticmethod
     def search_by_title(title):
@@ -126,8 +132,9 @@ class WechatArticleCrawler(object):
                     print(e)
         except BaseException as e:
             print(e)
-        write_workbook.save(WechatArticleCrawler.write_dir + "result_" + datetime.datetime.now().strftime("%Y-%m-"
-                            "%d_%H-%M-%S") + ".xls")
+        WechatArticleCrawler.wechat_article_result_path = WechatArticleCrawler.write_dir + "result_" + datetime.datetime.now().strftime("%Y-%m-"
+                            "%d_%H-%M-%S") + ".xls"
+        write_workbook.save(WechatArticleCrawler.wechat_article_result_path)
 
     @staticmethod
     def parse_js_content(bs_obj):
@@ -194,7 +201,7 @@ class WechatArticleCrawler(object):
     def mkdir_for_articles():
         now = datetime.datetime.now()
         date_str = now.strftime("%m_%d-%H_%M")
-        WechatArticleCrawler.article_dir = WechatArticleCrawler.article_dir % date_str
+        WechatArticleCrawler.article_dir = WechatArticleCrawler.article_dir_format % date_str
         path = WechatArticleCrawler.article_dir
         if not os.path.exists(path):
             cmd = "mkdir %s" % path
@@ -203,4 +210,4 @@ class WechatArticleCrawler(object):
 
 if __name__ == "__main__":
     sys.setrecursionlimit(100000)
-    WechatArticleCrawler.get_url_and_set("/Users/jfqiao/Desktop/xi_gua_articles/2018-04-08_11-11.xls")
+    WechatArticleCrawler.get_url_and_set("/Users/jfqiao/Desktop/xi_gua_articles/2018-04-08_17-24.xls")

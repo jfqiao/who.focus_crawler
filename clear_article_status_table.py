@@ -1,6 +1,8 @@
 # coding=utf-8
 
 import datetime
+import os
+import pexpect
 
 from db_util import DBUtil
 
@@ -14,14 +16,18 @@ class ClearFunction(object):
 
     DATE_FORMAT_STR = "%Y-%m-%d %H:%M:%S"
 
+    article_path = "/home/jfqiao/wechat_articles/"
+
+    image_path = "/data/who_focus/image/"
+
     @staticmethod
-    def get_article_id(date_str):
+    def get_article_info(date_str):
         """
         查询publish_time在一定的时间之后的文章ID
         :param date_str:  给定的时间字符串，格式为 yyyy-mm-dd HH:MM:SS.
         :return: 返回的结果是一个list，其中每一项都是dict，利用列的名字进行索引即可。
         """
-        sql = "SELECT id FROM t_article WHERE publish_time <= \"%s\"" % date_str
+        sql = "SELECT id, url, image_url FROM t_article WHERE publish_time <= \"%s\"" % date_str
         result = DBUtil.select_datas(sql)
         return result
 
@@ -36,6 +42,14 @@ class ClearFunction(object):
         for item in article_ids:
             sql = sql_format % item["id"]
             DBUtil.update_data(sql)
+            file_path = ClearFunction.article_path + item["url"].replace(":", "").replace("/", "")
+            os.system("rm -rf \"%s*\"" % file_path)     # 删除文章和摘要
+            file_path = ClearFunction.image_path + item["image_url"].replace(":", "").replace("/", "")
+            child = pexpect.spawn("sudo rm -rf \"%s*\"" % file_path)       # 删除图片
+            child.waitnoecho()
+            child.sendline("jfq19940210")
+            child.waitnoecho()
+            child.kill(0)
 
     @staticmethod
     def close_db_conn():
@@ -49,7 +63,7 @@ class ClearFunction(object):
         """
         if date_str is None:
             date_str = (datetime.datetime.now() - datetime.timedelta(days=2)).strftime(ClearFunction.DATE_FORMAT_STR)
-        article_ids = ClearFunction.get_article_id(date_str)
+        article_ids = ClearFunction.get_article_info(date_str)
         ClearFunction.clear_articles_with_id(article_ids)
 
     @staticmethod

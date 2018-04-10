@@ -3,6 +3,9 @@ from bs4 import BeautifulSoup
 import xlwt
 import datetime
 from db_util import DBUtil
+from wechat_crawler import WechatArticleCrawler
+import sys
+from website_crawler.crawler import Crawler
 
 import re
 
@@ -27,14 +30,17 @@ class XiGuaCrawler(object):
     tag_article_url = "http://zs.xiguaji.com/MArticle/Attention/?tags=%s&position=2"
 
     # 用来获取每一页的URL，有的标签下只有一页，有的标签下有多页。
-    page_url_format = "http://zs.xiguaji.com/MArticle/Attention/?position=2&dayInterval=1&articleType=-1&tags=%s&onlyTopLine=&page=%d&more=1"
+    page_url_format = "http://zs.xiguaji.com/MArticle/Attention/?position=2&dayInterval=0.08&articleType=-1&tags=%s&onlyTopLine=&page=%d&more=1"
 
     # datInterval 表示时间取值， 1表示最近24小时，0.08表示最近12小时，3表示最近3天
 
     # 西瓜爬文章的逻辑：设置登录cookie，从enter-url进入，然后获取每个分组的消息。首先拿到每个分组的tagID，然后根据tag_article_url请求更多
 
-    articles_dir = "/Users/jfqiao/Desktop/xi_gua_articles/"
+    articles_dir = Crawler.base_dir + "xi_gua_articles/"
+
     line_format = "%s,%s,%s,%s,%s,%s"
+
+    file_path = ""
 
     @staticmethod
     def set_cookie_dict():
@@ -49,6 +55,7 @@ class XiGuaCrawler(object):
     def xi_gua_crawl():
         XiGuaCrawler.set_cookie_dict()
         file_name = XiGuaCrawler.articles_dir + datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
+        XiGuaCrawler.file_path = file_name + ".xls"
         write_workbook = xlwt.Workbook(encoding="ascii")
         write_sheet = write_workbook.add_sheet("articles")
         XiGuaCrawler.write_sheet_write(write_sheet, XiGuaCrawler.line_count, "标题", "链接", "图片链接", "标签", "来源", "发布时间（相对）", "发布时间（绝对）")
@@ -131,4 +138,6 @@ class XiGuaCrawler(object):
 
 
 if __name__ == "__main__":
+    sys.setrecursionlimit(100000)
     XiGuaCrawler.xi_gua_crawl()
+    WechatArticleCrawler.get_url_and_set(XiGuaCrawler.file_path)
