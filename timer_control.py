@@ -36,9 +36,9 @@ from website_crawler import xiao_bai_chuang_ye
 
 from website_crawler.crawler import Crawler
 
-# host = "118.190.201.165"
+host = "118.190.201.165"
 
-host = "39.107.69.102"
+# host = "39.107.69.102"
 
 user = "jfqiao"
 
@@ -101,7 +101,7 @@ def wechat_article_crawler():
 
 
 def send_mail(att_path):
-    mailto_list = ['459003761@qq.com', "867309733@qq.com"]  # 收件人(列表)
+    mailto_list = ['459003761@qq.com', "867309733@qq.com", "jfqiao.123@qq.com"]  # 收件人(列表)
     mail_host = "smtp.163.com"  # 使用的邮箱的smtp服务器地址，这里是163的smtp地址
     mail_user = "jfqiao123"  # 用户名
     mail_pass = "tsi52hc8old"  # 密码
@@ -124,11 +124,19 @@ def send_mail(att_path):
     att1["Content-Disposition"] = 'attachment; filename="%s"' % file_name
     msg.attach(att1)
     try:
-        server = smtplib.SMTP()
-        server.connect(mail_host)                            # 连接服务器
-        server.login(mail_user, mail_pass)               # 登录操作
-        server.sendmail(me, mailto_list, msg.as_string())
-        server.close()
+        # server = smtplib.SMTP()
+        # server.connect(mail_host)                            # 连接服务器
+        # server.login(mail_user, mail_pass)               # 登录操作
+        # server.sendmail(me, mailto_list, msg.as_string())
+        # server.close()
+        smtp = smtplib.SMTP_SSL(mail_host, 465)
+        smtp.ehlo()
+        smtp.login(mail_user, mail_pass)
+        # server = smtplib.SMTP()
+        # server.connect(mail_host)                            # 连接服务器
+        # server.login(mail_user, mail_pass)               # 登录操作
+        smtp.sendmail(me, mailto_list, msg.as_string())
+        smtp.close()
         return True
     except Exception as e:
         print(str(e))
@@ -178,24 +186,30 @@ def server_deal_with_articles():
     ssh = SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(host, 22, user, password)
-    ssh.exec_command("py /home/jfqiao/project/who.focus_crawler/tar_and_move.py")
+    stdin, stdout, stderr = ssh.exec_command("python /home/jfqiao/project/who.focus_crawler/tar_and_move.py")
+    print(stdout.read())
     ssh.close()
 
 
 def timer():
-    time_to_crawl = [0, 9, 11, 13, 14, 17, 19, 20, 21, 22, 23, 24]
+    time_to_crawl = {0: 0, 9: 1, 11: 0, 13: 0, 14: 0, 17: 0, 19: 0, 20: 0, 21: 0, 22: 0, 23: 0}
+    previous = 9
     while 1:
         now = datetime.datetime.now()
-        if now.hour in time_to_crawl:
+        if time_to_crawl.get(now.hour) == 0:
             wechat_article_crawler()
             website_crawler()
-            time.sleep(3000)      # 预留10分钟用于爬虫时间
+            server_deal_with_articles()
             if now.hour == 24 or now.hour == 0:
                 time_gap = datetime.timedelta(days=1)
                 Crawler.target_date = now - time_gap              # 重置网站爬虫时间
+            time_to_crawl[now.hour] = 1
+            if previous != -1:
+                time_to_crawl[previous] = 0
+            previous = now.hour
+            time.sleep(2000)  # 预留10分钟用于爬虫时间
         # print(now.second)
         time.sleep(1)
-
 
 def get_dir(path):
     if path.endswith("/"):
@@ -218,6 +232,10 @@ def transfer_file(src, target, host_para, user_para, password_para):
 
 
 if __name__ == "__main__":
+    # timer()
+    now = datetime.datetime.now()
+    time_gap = datetime.timedelta(days=1)
+    Crawler.target_date = now - time_gap
     wechat_article_crawler()
     website_crawler()
     server_deal_with_articles()
