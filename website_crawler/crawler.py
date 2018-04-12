@@ -22,7 +22,7 @@ class Crawler(object):
     3. Crawler保存workbook
     """
 
-    base_dir = "/Users/jfqiao/Desktop/"
+    base_dir = "/home/jfqiao/crawler/"
 
     is_article_dir_exists = 0     # 针对保存爬的文章的文件夹是否存在的标志，默认文件夹不存在，需要创建
 
@@ -48,7 +48,7 @@ class Crawler(object):
 
     insert_sql = "INSERT INTO t_article_url(url, insert_time) VALUES(\"%s\", \"%s\")"
 
-    target_date = datetime.datetime.strptime("2018-04-09 23:59:59", "%Y-%m-%d %H:%M:%S")
+    target_date = datetime.datetime.strptime("2018-04-10 23:59:59", "%Y-%m-%d %H:%M:%S")
 
     write_file_path = ""
 
