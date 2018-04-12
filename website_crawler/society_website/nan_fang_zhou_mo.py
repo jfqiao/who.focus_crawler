@@ -45,12 +45,14 @@ class WenHua(Crawler):
                         image_url = article.find("img").get("src")
                         rel_date = article.find("p", class_="articleInfo").get_text()
                         pos = rel_date.find(str(b'\xc2\xa0', encoding="utf-8"))
+                        if pos == -1:
+                            pos = rel_date.find(str(b'\xc2\xa0', encoding="utf-8"))
                         rel_date = rel_date[pos + 2:]
                         # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd
                         date = self.convert_date(rel_date)
-                        # if date < self.target_date:  # 比较文章的发表时间，可以保留特定时间段内的文章
-                        #     WenHua.update_stop = 1  # 如果文章的发表时间在给定的时间之前，则停止爬虫
-                        #     break
+                        if date < self.target_date:  # 比较文章的发表时间，可以保留特定时间段内的文章
+                            WenHua.update_stop = 1  # 如果文章的发表时间在给定的时间之前，则停止爬虫
+                            break
                         date_str = date.strftime(Crawler.time_format)
                         self.get_article_content(url)
                         self.crawl_image_and_save(image_url)
@@ -59,10 +61,10 @@ class WenHua(Crawler):
                         self.insert_url(url)
                         print(url)
                     except BaseException as e:
-                        print("WenHua crawl error. ErrMsg: %s" % str(e))
+                        print("NanFangZhouMo crawl error. ErrMsg: %s" % str(e))
                 page += 1
         except BaseException as e:
-            print("WenHua crawl error. ErrMsg: %s" % str(e))
+            print("NanFangZhouMo crawl error. ErrMsg: %s" % str(e))
         finally:
             WenHua.update_stop = 0    # 重置为开始状态，为后续爬其他模块做准备。
 
@@ -82,7 +84,7 @@ class WenHua(Crawler):
             date = datetime.datetime.strptime(date_str, time_format)
             return date
         except BaseException as e:
-            print("Convert time error in WenHua. ErrMsg: %s" % str(e))
+            print("Convert time error in NanFangZhouMo. ErrMsg: %s" % str(e))
 
 
 def crawl():
