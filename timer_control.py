@@ -33,6 +33,7 @@ from website_crawler import pin_tu
 from website_crawler import pin_wan
 from website_crawler import tai_mei_ti
 from website_crawler import xiao_bai_chuang_ye
+from website_crawler.society_website import she_hui_website
 
 from website_crawler.crawler import Crawler
 
@@ -164,6 +165,7 @@ def website_crawler():
     pin_tu.crawl()
     tai_mei_ti.crawl()
     xiao_bai_chuang_ye.crawl()
+    she_hui_website.crawl()
     Crawler.save_workbook()
     Crawler.is_article_dir_exists = 0   # 设置状态为0，下次启动时重新创建文件夹
     send_mail(Crawler.write_file_path)
