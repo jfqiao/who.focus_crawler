@@ -47,10 +47,10 @@ class ShangYe(Crawler):
                         date = self.convert_date(rel_date)
                         if date < self.target_date:  # 比较文章的发表时间，可以保留特定时间段内的文章
                             ShangYe.update_stop = 1  # 如果文章的发表时间在给定的时间之前，则停止爬虫
-                            continue
+                            break
                         self.get_article_content(url)
                         self.crawl_image_and_save(image_url)
-                        self.write_data_to_sheet(title, url, image_url, date.strftime("%Y-%m-%d %H:%M"), rel_date,
+                        self.write_data_to_sheet(title, url, image_url, date.strftime(Crawler.time_format), rel_date,
                                                  self.label, self.origin)
                         self.insert_url(url)
                         print(url)
@@ -142,7 +142,7 @@ class ChuangYe(ShangYe):
                         continue
                     self.get_article_content(url)
                     self.crawl_image_and_save(image_url)
-                    self.write_data_to_sheet(title, url, image_url, date.strftime("%Y-%m-%d %H:%M"), rel_date,
+                    self.write_data_to_sheet(title, url, image_url, date.strftime(Crawler.time_format), rel_date,
                                              self.label, self.origin)
                     self.insert_url(url)
                     print(url)
@@ -222,7 +222,7 @@ class KeJi(ChuangYe):
                         continue
                     self.get_article_content(url)
                     self.crawl_image_and_save(image_url)
-                    self.write_data_to_sheet(title, url, image_url, date.strftime("%Y-%m-%d %H:%M"), rel_date,
+                    self.write_data_to_sheet(title, url, image_url, date.strftime(Crawler.time_format), rel_date,
                                              self.label, self.origin)
                     self.insert_url(url)
                     print(url)

@@ -47,10 +47,10 @@ class YiXieShiGanHuo(Crawler):
                         if date < self.target_date:  # 比较文章的发表时间，可以保留特定时间段内的文章
                             YiXieShiGanHuo.update_stop = 1  # 如果文章的发表时间在给定的时间之前，则停止爬虫
                             break
+                        date_str = date.strftime(Crawler.time_format)
                         self.get_article_content(url)
                         self.crawl_image_and_save(image_url)
-                        self.write_data_to_sheet(title, url, image_url, date.strftime(Crawler.time_format),
-                                                 date.strftime(Crawler.time_format),
+                        self.write_data_to_sheet(title, url, image_url, date_str, date_str,
                                                  self.label, self.origin)
                         self.insert_url(url)
                         print(url)

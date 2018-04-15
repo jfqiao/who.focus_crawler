@@ -58,7 +58,8 @@ class XiGuaCrawler(object):
         XiGuaCrawler.file_path = file_name + ".xls"
         write_workbook = xlwt.Workbook(encoding="ascii")
         write_sheet = write_workbook.add_sheet("articles")
-        XiGuaCrawler.write_sheet_write(write_sheet, XiGuaCrawler.line_count, "标题", "链接", "图片链接", "标签", "来源", "发布时间（相对）", "发布时间（绝对）")
+        XiGuaCrawler.write_sheet_write(write_sheet, XiGuaCrawler.line_count, "标题", "链接", "图片链接", "标签",
+                                       "来源", "发布时间（绝对）", "发布时间（相对）")
         XiGuaCrawler.set_cookie_dict()
         r = requests.get(XiGuaCrawler.enter_url, cookies=XiGuaCrawler.cookies_dict)
         serverid = r.cookies.get("SERVERID")
@@ -83,8 +84,8 @@ class XiGuaCrawler(object):
         write_sheet.write(line_count, 2, image_link)
         write_sheet.write(line_count, 3, tag)
         write_sheet.write(line_count, 4, origin)
-        write_sheet.write(line_count, 6, rel_time)
         write_sheet.write(line_count, 5, standard_time)
+        write_sheet.write(line_count, 6, rel_time)
 
     @staticmethod
     def craw_tag(tag_name, tag_id, write_sheet):
@@ -111,7 +112,8 @@ class XiGuaCrawler(object):
                     rel_time = source_tag.find("div", class_="item-sub-title").get_text()
                     standard_time = XiGuaCrawler.convert_time_to_standard_time(rel_time)
                     XiGuaCrawler.line_count += 1
-                    XiGuaCrawler.write_sheet_write(write_sheet, XiGuaCrawler.line_count, title, link, "", tag_name, origin, rel_time, standard_time)
+                    XiGuaCrawler.write_sheet_write(write_sheet, XiGuaCrawler.line_count, title, link, "",
+                                                   tag_name, origin, rel_time, standard_time)
             page += 1
 
     @staticmethod

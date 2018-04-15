@@ -55,7 +55,7 @@ class YuLe(Crawler):
                             break
                         self.get_article_content(url)
                         self.crawl_image_and_save(image_url)
-                        self.write_data_to_sheet(title, url, image_url, date.strftime("%Y-%m-%d %H:%M"), rel_date,
+                        self.write_data_to_sheet(title, url, image_url, date.strftime(Crawler.time_format), rel_date,
                                                  self.label, self.origin)
                         self.insert_url(url)
                         print(url)

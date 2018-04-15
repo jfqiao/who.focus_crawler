@@ -22,7 +22,7 @@ class Crawler(object):
     3. Crawler保存workbook
     """
 
-    base_dir = "/home/jfqiao/crawler/"
+    base_dir = "/Users/jfqiao/Desktop/"
 
     is_article_dir_exists = 0     # 针对保存爬的文章的文件夹是否存在的标志，默认文件夹不存在，需要创建
 
@@ -34,7 +34,7 @@ class Crawler(object):
 
     image_dir = base_dir + "image/"
 
-    time_format = "%Y-%m-%d %H:%M"
+    time_format = "%Y-%m-%d %H:%M:%S"
 
     workbook = None
 
@@ -48,7 +48,7 @@ class Crawler(object):
 
     insert_sql = "INSERT INTO t_article_url(url, insert_time) VALUES(\"%s\", \"%s\")"
 
-    target_date = datetime.datetime.strptime("2018-04-10 23:59:59", "%Y-%m-%d %H:%M:%S")
+    target_date = datetime.datetime.strptime("2018-04-12 23:59:59", "%Y-%m-%d %H:%M:%S")
 
     write_file_path = ""
 
@@ -67,7 +67,7 @@ class Crawler(object):
     def initialize_workbook():
         Crawler.workbook = xlwt.Workbook(encoding="ascii")
         Crawler.worksheet = Crawler.workbook.add_sheet("articles")
-        Crawler.write_data_to_sheet("标题", "链接", "图片链接", "发布时间（相对）", "发布时间（绝对）", "标签", "来源")
+        Crawler.write_data_to_sheet("标题", "链接", "图片链接", "发布时间（绝对）", "发布时间（对）", "标签", "来源")
 
     @staticmethod
     def write_data_to_sheet(title, url, image_link, abs_date, rel_date, label, origin):
@@ -76,8 +76,8 @@ class Crawler(object):
         Crawler.worksheet.write(Crawler.line_count, 2, label=image_link)
         Crawler.worksheet.write(Crawler.line_count, 3, label=label)
         Crawler.worksheet.write(Crawler.line_count, 4, label=origin)
-        Crawler.worksheet.write(Crawler.line_count, 5, label=rel_date)
-        Crawler.worksheet.write(Crawler.line_count, 6, label=abs_date)
+        Crawler.worksheet.write(Crawler.line_count, 5, label=abs_date)
+        Crawler.worksheet.write(Crawler.line_count, 6, label=rel_date)
         Crawler.line_count += 1
 
     @staticmethod

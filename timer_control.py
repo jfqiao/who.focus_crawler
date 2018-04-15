@@ -50,14 +50,14 @@ def wechat_article_crawler():
     sys.setrecursionlimit(100000)
     XiGuaCrawler.xi_gua_crawl()
     WechatArticleCrawler.get_url_and_set(XiGuaCrawler.file_path)
-    path_dir, target_dir = get_dir(WechatArticleCrawler.article_dir)
-    os.chdir(path_dir)
-    os.system("tar -czvf result1.tar.gz \"%s\"" % target_dir)
-    src = path_dir + "/result1.tar.gz"
-    target = "/home/jfqiao/result/"
-    transfer_file(src, target, host, user, password)
-    os.system("rm -rf %s/result1.tar.gz" % path_dir)
-    send_mail(WechatArticleCrawler.wechat_article_result_path)
+    # path_dir, target_dir = get_dir(WechatArticleCrawler.article_dir)
+    # os.chdir(path_dir)
+    # os.system("tar -czvf result1.tar.gz \"%s\"" % target_dir)
+    # src = path_dir + "/result1.tar.gz"
+    # target = "/home/jfqiao/result/"
+    # transfer_file(src, target, host, user, password)
+    # os.system("rm -rf %s/result1.tar.gz" % path_dir)
+    # send_mail(WechatArticleCrawler.wechat_article_result_path)
 
 # def send_email():
 #     mail_host = "smtp.163.com"  # 使用的邮箱的smtp服务器地址，这里是163的smtp地址
@@ -167,21 +167,21 @@ def website_crawler():
     xiao_bai_chuang_ye.crawl()
     she_hui_website.crawl()
     Crawler.save_workbook()
-    Crawler.is_article_dir_exists = 0   # 设置状态为0，下次启动时重新创建文件夹
-    send_mail(Crawler.write_file_path)
-    article_path_dir, article_target_dir = get_dir(Crawler.write_article_path)
-    os.chdir(article_path_dir)
-    os.system("tar -czvf result2.tar.gz %s" % article_target_dir)
-    src = article_path_dir + "/result2.tar.gz"
-    target = "/home/jfqiao/result/"
-    transfer_file(src, target, host, user, password)
-    os.system("rm -rf %s/result2.tar.gz" % article_path_dir)
-    image_path_dir, image_target_dir = get_dir(Crawler.write_image_path)
-    os.chdir(image_path_dir)
-    os.system("tar -czvf result3.tar.gz %s" % image_target_dir)
-    src = image_path_dir + "/result3.tar.gz"
-    transfer_file(src, target, host, user, password)
-    os.system("rm -rf %s/result3.tar.gz" % image_path_dir)
+    # Crawler.is_article_dir_exists = 0   # 设置状态为0，下次启动时重新创建文件夹
+    # # send_mail(Crawler.write_file_path)
+    # article_path_dir, article_target_dir = get_dir(Crawler.write_article_path)
+    # os.chdir(article_path_dir)
+    # os.system("tar -czvf result2.tar.gz %s" % article_target_dir)
+    # src = article_path_dir + "/result2.tar.gz"
+    # target = "/home/jfqiao/result/"
+    # transfer_file(src, target, host, user, password)
+    # os.system("rm -rf %s/result2.tar.gz" % article_path_dir)
+    # image_path_dir, image_target_dir = get_dir(Crawler.write_image_path)
+    # os.chdir(image_path_dir)
+    # os.system("tar -czvf result3.tar.gz %s" % image_target_dir)
+    # src = image_path_dir + "/result3.tar.gz"
+    # transfer_file(src, target, host, user, password)
+    # os.system("rm -rf %s/result3.tar.gz" % image_path_dir)
 
 
 def server_deal_with_articles():
@@ -213,6 +213,7 @@ def timer():
         # print(now.second)
         time.sleep(1)
 
+
 def get_dir(path):
     if path.endswith("/"):
         path = path[:-1]
@@ -240,4 +241,4 @@ if __name__ == "__main__":
     Crawler.target_date = now - time_gap
     wechat_article_crawler()
     website_crawler()
-    server_deal_with_articles()
+    # server_deal_with_articles()

@@ -3,6 +3,13 @@
 from db_util import DBUtil
 import requests
 
+from tmp_website_crawler import do_news
+from tmp_website_crawler import jie_mian
+from tmp_website_crawler import manager_share
+from tmp_website_crawler import pin_wan
+from tmp_website_crawler import yi_xie_shi
+from website_crawler.crawler import Crawler
+
 
 def reset_image_url():
     f = open("/home/jfqiao/result_2018-03-21_22-37.csv", "r")
@@ -42,3 +49,13 @@ def crawl_image():
         print(cnt)
         cnt += 1
     f.close()
+
+
+if __name__ == "__main__":
+    Crawler.initialize_workbook()
+    do_news.crawl()
+    jie_mian.crawl()
+    manager_share.crawl()
+    pin_wan.crawl()
+    yi_xie_shi.crawl()
+    Crawler.save_workbook()

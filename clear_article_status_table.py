@@ -2,7 +2,7 @@
 
 import datetime
 import os
-import pexpect
+import sys
 
 from db_util import DBUtil
 
@@ -10,8 +10,17 @@ from db_util import DBUtil
 class ClearFunction(object):
 
     """
-     对t_article_status表进行更新，按照时间进行删除，可以是给定时间段，也可以给定时间差（以现在的时间为基准）。
-     对timestamp进行比较直接用字符串比较即可。
+    说明：清理文章功能。
+    过程：
+        一、根据t_article表中的publish_time判断，在给定时间之前的文章全部要被删除
+        二、删除的方法是清空t_article_status表以及t_article表，但是不删除文章对应的文件以及图片
+        三、清理完后，复制在t_article_status表中依然存在的文章到临时文件夹，
+        四、删除文章文件夹以及图片文件夹中所有的文件，将临时文件夹中的文件移动到相应的文件夹下。
+    代码操作：
+    1 在shell下运行清除状态表
+    2 在shell下移动文件到临时的文件夹下
+    3 删除现有文章以及图片所有文件
+    4 复制文本、图片到相应的文件夹中
     """
 
     DATE_FORMAT_STR = "%Y-%m-%d %H:%M:%S"
@@ -39,13 +48,18 @@ class ClearFunction(object):
         :return:
         """
         sql_format = "DELETE FROM t_article_status WHERE article_id = %s"
+        delete_article = "DELETE FROM t_article WHERE id = %s"
         for item in article_ids:
             sql = sql_format % item["id"]
             DBUtil.update_data(sql)
-            file_path = ClearFunction.article_path + item["url"].replace(":", "").replace("/", "")
-            os.system("rm -rf \"%s*\"" % file_path)     # 删除文章和摘要
-            file_path = ClearFunction.image_path + item["image_url"].replace(":", "").replace("/", "")
-            os.system("echo jfq19940210 | sudo -S rm -rf \"%s*\"" % file_path)
+            DBUtil.update_data(delete_article % item["id"])
+            # 不删除文章，用另外一种方式处理。
+            # file_path = ClearFunction.article_path + item["url"].replace(":", "").replace("/", "")
+            # os.system("rm -rf \"%s\"" % file_path)     # 删除文章
+            # os.system("rm -rf \"%s_abstract\"" % file_path)
+            # file_path = ClearFunction.image_path + item["image_url"].replace(":", "").replace("/", "")
+            # os.system("echo jfq19940210 | sudo -S rm -rf \"%s\"" % file_path)
+            # os.system("echo jfq19940210 | sudo -S rm -rf \"%s.txt\"" % file_path)
             # child = pexpect.spawn("sudo rm -rf \"%s*\"" % file_path)       # 删除图片
             # child.waitnoecho()
             # child.sendline("jfq19940210")
@@ -86,11 +100,36 @@ class ClearFunction(object):
         return date_now
 
 
+def move_article_and_image():
+    article_id_sql = "SELECT DISTINCT article_id from t_article_status"
+    result = DBUtil.select_datas(article_id_sql)
+    image_path = "/data/who_focus/image/"
+    article_path = "/home/jfqiao/wechat_articles/"
+    for item in result:
+        sql = "SELECT url, image_url FROM t_article WHERE id=%s" % item["article_id"]
+        article = DBUtil.select_data(sql)
+        article_file_name = article["url"].replace("/", "").replace(":", "")
+        os.system("cp \"%s\" /home/jfqiao/tmp_article/" % (article_path + article_file_name))
+        os.system("cp \"%s\" /home/jfqiao/tmp_article/" % (article_path + article_file_name + "_abstract"))
+        if article["image_url"].startswith("https://mmbiz.qpic") or article["image_url"].startswith("http://mmbiz.qpic"):
+            continue
+        pos = article["image_url"].find("?")
+        if pos == -1:
+            pos = len(article["image_url"])
+        image_file_name = article["image_url"][:pos].replace(":", "").replace("/", "")
+        os.system("cp \"%s\" /home/jfqiao/tmp_image/" % (image_path + image_file_name))
+        os.system("cp \"%s\" /home/jfqiao/tmp_image/" % (image_path + image_file_name + ".txt"))
+
+
 if __name__ == "__main__":
     # 当前清理的时间。每隔一个小时就要清理一次，可以写成定时任务。
-    date_str_now = "2017-03-11 7:00:00"
-    clear_date_str = ClearFunction.time_convert(date_str_now).strftime(ClearFunction.DATE_FORMAT_STR)
-    try:
-        ClearFunction.delete_article(date_str_now)
-    finally:
-        ClearFunction.close_db_conn()
+    paras = sys.argv[1]
+    if paras == "database":
+        date_str_now = sys.argv[2]
+        clear_date_str = ClearFunction.time_convert(date_str_now).strftime(ClearFunction.DATE_FORMAT_STR)
+        try:
+            ClearFunction.delete_article(date_str_now)
+        finally:
+            ClearFunction.close_db_conn()
+    else:
+        move_article_and_image()

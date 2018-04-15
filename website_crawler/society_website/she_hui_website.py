@@ -11,7 +11,7 @@ from website_crawler.crawler import Crawler
 
 
 def crawl():
-    Crawler.initialize_workbook()
+    # Crawler.initialize_workbook()
     da_gong_she_ping.crawl()
     huan_qiu_wang.crawl()
     nan_fang_zhou_mo.crawl()
@@ -19,7 +19,7 @@ def crawl():
     xin_jing_bao.crawl()
     zhong_guo_jing_ji_wang.crawl()
     zaker.crawl()
-    Crawler.save_workbook()
+    # Crawler.save_workbook()
 
 
 if __name__ == "__main__":

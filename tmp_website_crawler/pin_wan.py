@@ -53,9 +53,11 @@ class PinWanCrawler(Crawler):
                         break
                     label = "段子"
                     self.get_article_content(url)
-                    self.write_data_to_sheet(title, url, image_url, date.strftime("%Y-%m-%d %H:%M"), rel_date,
+                    self.crawl_image_and_save(image_url)
+                    self.write_data_to_sheet(title, url, image_url, date.strftime(Crawler.time_format), rel_date,
                                              label, self.origin)
                     self.insert_url(url)
+                    print(url)
                 page += 1
         except BaseException as e:
             print("PinWan crawl error. ErrMsg: %s" % str(e))
@@ -105,8 +107,6 @@ class PinWanCrawler(Crawler):
         result.append({"type": "text", "data": item.__str__() + "<br />"})
 
 
-if __name__ == "__main__":
-    Crawler.initialize_workbook()
+def crawl():
     pw = PinWanCrawler()
     pw.crawl()
-    Crawler.save_workbook()

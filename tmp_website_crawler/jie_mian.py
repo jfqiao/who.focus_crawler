@@ -55,9 +55,11 @@ class JieMianCrawler(Crawler):
                     else:
                         label = "娱乐圈"
                     self.get_article_content(url)
-                    self.write_data_to_sheet(title, url, image_url, date.strftime("%Y-%m-%d %H:%M"), rel_date,
+                    self.crawl_image_and_save(image_url)
+                    self.write_data_to_sheet(title, url, image_url, date.strftime(Crawler.time_format), rel_date,
                                              label, self.origin)
                     self.insert_url(url)
+                    print(url)
                 page += 1
         except BaseException as e:
             print("JieMian crawl error. ErrMsg:%s" % str(e))
@@ -151,8 +153,6 @@ class JieMianCrawler(Crawler):
             print("JieMain crawler error in convert time. Time String : %s. ErrMsg: %s" % (date_str, str(e)))
 
 
-if __name__ == "__main__":
-    Crawler.initialize_workbook()
+def crawl():
     jm = JieMianCrawler()
     jm.crawl()
-    Crawler.save_workbook()
