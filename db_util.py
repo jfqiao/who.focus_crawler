@@ -15,7 +15,7 @@ class DBUtil(object):
                               port=3306,
                               user='root',
                               password='1234',
-                              db='db_WhoFocus',
+                              db='db_WhoFocus_dev',
                               charset='utf8',
                               cursorclass=pymysql.cursors.DictCursor)
         return con

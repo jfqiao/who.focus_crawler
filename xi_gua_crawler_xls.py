@@ -12,6 +12,8 @@ import re
 
 class XiGuaCrawler(object):
 
+    need_crawl_tag = ["商业资讯", "社会观点", "校园学习", "时尚", "体育", "电影", "游戏", "趣味", "读书"]
+
     insert_sql_format = "INSERT INTO t_article_url(url) VALUES(\"%s\")"
 
     select_sql_format = "SELECT * FROM t_article_url WHERE url = \"%s\""
@@ -73,6 +75,8 @@ class XiGuaCrawler(object):
             tags_dict[tag_name] = tag_id
         keys = tags_dict.keys()
         for key in keys:
+            if key not in XiGuaCrawler.need_crawl_tag:
+                continue
             print(key)
             XiGuaCrawler.craw_tag(key, tags_dict.get(key), write_sheet)
         write_workbook.save(file_name + ".xls")

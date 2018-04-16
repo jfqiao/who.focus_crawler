@@ -4,6 +4,7 @@ import xlwt
 import xlrd
 import random
 import datetime
+import requests
 
 
 class Record(object):
@@ -46,6 +47,8 @@ class UploadUtil(object):
 
     @staticmethod
     def parse_xls_file(file_path, result_list, title_list):
+        if file_path is None:
+            return
         read_book = xlrd.open_workbook(file_path)
         read_table = read_book.sheet_by_index(0)
         rows = read_table.nrows
@@ -148,10 +151,22 @@ class UploadUtil(object):
         for i in range(11):
             UploadUtil.set_record_info(result_list, schools_count_list[i])
             UploadUtil.generate_school_xls_file(result_list, UploadUtil.schools[i] + "_" + time_str)
+            UploadUtil.post_file_to_server(UploadUtil.schools[i] + "_" + time_str, UploadUtil.schools[i])
+
+    @staticmethod
+    def post_file_to_server(file_name, school):
+        url = "https://www.leftbrain.cc/who.focus_test/uploadSchoolArticles"
+        data = {"school": school}
+        files = {"file": open(UploadUtil.school_result_dir + file_name, "rb"), "articleFile": file_name}
+        resp = requests.post(url, data=data, files=files)
+        print(resp.status_code)
 
 
 if __name__ == "__main__":
-    wechat = UploadUtil.school_result_dir + "result_2018-04-15_14-58.xls"
-    website = UploadUtil.school_result_dir + "result_2018-04-15_14-54-17.xls"
-    UploadUtil.parse_and_generate(website, wechat)
-
+    # wechat = UploadUtil.school_result_dir + "result_2018-04-15_23-12.xls"
+    # website = UploadUtil.school_result_dir + "result_2018-04-15_23-11-58.xls"
+    website = UploadUtil.school_result_dir + "result_2018-04-16_20-48.xls"
+    UploadUtil.parse_and_generate(None, website)
+    # path = "/Users/jfqiao/Desktop/审核文章/result_2018-04-13_16-35.xls"
+    # school_name = "北京大学"
+    # UploadUtil.post_file_to_server(path, school_name)
