@@ -18,7 +18,7 @@ def crawl():
     # ren_min_wang.crawl()
     # xin_jing_bao.crawl()
     # zhong_guo_jing_ji_wang.crawl()
-    zaker.crawl()
+    # zaker.crawl()
     guan_cha_zhe_wang.crawl()
     # Crawler.save_workbook()
 

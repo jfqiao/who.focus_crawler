@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # 当前清理的时间。每隔一个小时就要清理一次，可以写成定时任务。
     paras = sys.argv[1]
     if paras == "database":
-        date_str_now = sys.argv[2]
+        date_str_now = "2018-04-16 12:00:00"
         clear_date_str = ClearFunction.time_convert(date_str_now).strftime(ClearFunction.DATE_FORMAT_STR)
         try:
             ClearFunction.delete_article(date_str_now)
