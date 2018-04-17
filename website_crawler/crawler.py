@@ -50,7 +50,7 @@ class Crawler(object):
 
     insert_sql = "INSERT INTO t_article_url(url, insert_time) VALUES(\"%s\", \"%s\")"
 
-    target_date = datetime.datetime.strptime("2018-04-12 23:59:59", "%Y-%m-%d %H:%M:%S")
+    target_date = datetime.datetime.strptime("2018-04-16 23:59:59", "%Y-%m-%d %H:%M:%S")
 
     write_file_path = ""
 

@@ -127,8 +127,8 @@ def crawl():
     obj.crawl()
     obj = RenGongZhiNeng()
     obj.crawl()
-    obj = QuKuaiLian()
-    obj.crawl()
+    # obj = QuKuaiLian()
+    # obj.crawl()
 
 
 if __name__ == "__main__":

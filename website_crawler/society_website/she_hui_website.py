@@ -8,17 +8,18 @@ from website_crawler.society_website import xin_jing_bao
 from website_crawler.society_website import zaker
 from website_crawler.society_website import zhong_guo_jing_ji_wang
 from website_crawler.crawler import Crawler
-
+from website_crawler.society_website import guan_cha_zhe_wang
 
 def crawl():
     # Crawler.initialize_workbook()
-    da_gong_she_ping.crawl()
-    huan_qiu_wang.crawl()
+    # da_gong_she_ping.crawl()
+    # huan_qiu_wang.crawl()
     nan_fang_zhou_mo.crawl()
-    ren_min_wang.crawl()
-    xin_jing_bao.crawl()
-    zhong_guo_jing_ji_wang.crawl()
+    # ren_min_wang.crawl()
+    # xin_jing_bao.crawl()
+    # zhong_guo_jing_ji_wang.crawl()
     zaker.crawl()
+    guan_cha_zhe_wang.crawl()
     # Crawler.save_workbook()
 
 

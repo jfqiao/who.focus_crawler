@@ -128,7 +128,7 @@ class ChuangYeTouZi(LingShouQianYan):
 
 
 def crawl():
-    items = [LingShouQianYan(), ZhiNengKeJi(), QuKuaiLian(), FanWenYu(), XinXiaoFei(), ChuangYeTouZi()]
+    items = [LingShouQianYan(), ZhiNengKeJi(), FanWenYu(), XinXiaoFei(), ChuangYeTouZi()]
     for item in items:
         item.crawl()
 

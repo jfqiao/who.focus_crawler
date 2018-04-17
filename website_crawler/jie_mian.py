@@ -257,6 +257,21 @@ class ChuangYe(YuLe):
         self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=141&page=%s"
         self.label = "创业干货"
 
+
+class TianXia(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=32&page=%s"
+        self.label = "社会"
+
+
+class ZhongGuo(YuLe):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "https://a.jiemian.com/index.php?m=lists&a=ajaxlist&cid=71&page=%s"
+        self.label = "社会"
         
 def crawl():
     items = [YuLe(), HongGuan(), TiYu(), ShiShang(), WenHua(), YouXi(), ShuJu(), KeJi(), ZhengQuan(), JinRong(),

@@ -134,7 +134,7 @@ class QiCheChuXing(DaGongSi):
 
 
 def crawl():
-    items = [DaGongSi(), English(), QuKuaiLian(), ChuangTou(), WenYuShengHuo(), QiCheChuXing()]
+    items = [DaGongSi(), English(), ChuangTou(), WenYuShengHuo(), QiCheChuXing()]
     for item in items:
         item.crawl()
 

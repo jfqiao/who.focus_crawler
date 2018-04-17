@@ -156,8 +156,8 @@ def crawl():
     ds.crawl()
     yq = YiXieShiYouQu()
     yq.crawl()
-    bg = YiXieShiBaoGao()
-    bg.crawl()
+    # bg = YiXieShiBaoGao()
+    # bg.crawl()
 
 
 if __name__ == "__main__":

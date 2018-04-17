@@ -165,9 +165,37 @@ class Zaker(Crawler):
             print("Convert time error in Zaker. ErrMsg: %s" % str(e))
 
 
+class YuLe(Zaker):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "http://www.myzaker.com/channel/9"
+        self.label = "娱乐"
+
+
+class TiYu(Zaker):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "http://www.myzaker.com/channel/8"
+        self.label = "娱乐"
+
+
+class HuLianWang(Zaker):
+
+    def __init__(self):
+        super().__init__()
+        self.page_url = "http://www.myzaker.com/channel/5"
+        self.label = "资讯"
+
+
 def crawl():
-    cyb = Zaker()
-    cyb.crawl()
+    yl = YuLe()
+    yl.crawl()
+    ty = TiYu()
+    ty.crawl()
+    hlw = HuLianWang()
+    hlw.crawl()
 
 
 if __name__ == "__main__":
