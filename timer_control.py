@@ -240,5 +240,5 @@ if __name__ == "__main__":
     day_gap = datetime.timedelta(days=1)
     Crawler.target_date = now - day_gap
     wechat_article_crawler()
-    website_crawler()
+    # website_crawler()
     server_deal_with_articles()

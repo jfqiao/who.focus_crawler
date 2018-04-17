@@ -22,7 +22,9 @@ class Crawler(object):
     3. Crawler保存workbook
     """
 
-    base_dir = "/Users/jfqiao/Desktop/"
+    # base_dir = "/Users/jfqiao/Desktop/"
+
+    base_dir = "/home/jfqiao/crawler/"
 
     is_article_dir_exists = 0     # 针对保存爬的文章的文件夹是否存在的标志，默认文件夹不存在，需要创建
 

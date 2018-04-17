@@ -5,6 +5,7 @@ import xlrd
 import random
 import datetime
 import requests
+import html.parser
 
 
 class Record(object):
@@ -22,9 +23,9 @@ class Record(object):
 
     max_hot_rate = 200
 
-    min_hot_rate_status = 280
+    min_hot_rate_status = 220
 
-    max_hot_rate_status = 330
+    max_hot_rate_status = 295
 
     def __init__(self, title, url, image_url, origin, label, publish_time):
         self.title = title
@@ -40,7 +41,9 @@ class Record(object):
 
 class UploadUtil(object):
 
-    school_result_dir = "/Users/jfqiao/Desktop/write_aritlce_dirs/"
+    # school_result_dir = "/Users/jfqiao/Desktop/write_aritlce_dirs/"
+
+    school_result_dir = "/home/jfqiao/crawler/school_reuslt_dir/"
 
     schools = ["北京大学", "清华大学", "复旦大学", "浙江大学", "中国人民大学", "中央财经大学", "对外经济贸易大学", "北京师范大学",
                "中国政法大学", "中山大学", "其他高校"]
@@ -155,18 +158,19 @@ class UploadUtil(object):
 
     @staticmethod
     def post_file_to_server(file_name, school):
-        url = "https://www.leftbrain.cc/who.focus_test/uploadSchoolArticles"
+        url = "https://www.leftbrain.cc/who.focus_final/uploadSchoolArticles"
         data = {"school": school}
-        files = {"file": open(UploadUtil.school_result_dir + file_name, "rb"), "articleFile": file_name}
+        upload_file_name = "result.xls"
+        file_name += ".xls"
+        files = {"articleFile": (upload_file_name, open(UploadUtil.school_result_dir + file_name, "rb"))}
         resp = requests.post(url, data=data, files=files)
-        print(resp.status_code)
+        print(resp.text)
 
 
 if __name__ == "__main__":
-    # wechat = UploadUtil.school_result_dir + "result_2018-04-15_23-12.xls"
-    # website = UploadUtil.school_result_dir + "result_2018-04-15_23-11-58.xls"
-    website = UploadUtil.school_result_dir + "result_2018-04-16_20-48.xls"
-    UploadUtil.parse_and_generate(None, website)
+    wechat = None
+    website = None
+    UploadUtil.parse_and_generate(wechat, website)
     # path = "/Users/jfqiao/Desktop/审核文章/result_2018-04-13_16-35.xls"
     # school_name = "北京大学"
     # UploadUtil.post_file_to_server(path, school_name)
