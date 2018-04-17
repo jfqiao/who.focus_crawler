@@ -4,7 +4,6 @@ from xi_gua_crawler_xls import XiGuaCrawler
 from wechat_crawler import WechatArticleCrawler
 import sys
 import os
-import pexpect
 import datetime
 import time
 
@@ -34,6 +33,7 @@ from website_crawler import pin_wan
 from website_crawler import tai_mei_ti
 from website_crawler import xiao_bai_chuang_ye
 from website_crawler.society_website import she_hui_website
+from upload_file_util import UploadUtil
 
 from website_crawler.crawler import Crawler
 
@@ -240,5 +240,6 @@ if __name__ == "__main__":
     day_gap = datetime.timedelta(days=1)
     Crawler.target_date = now - day_gap
     wechat_article_crawler()
-    # website_crawler()
+    website_crawler()
     server_deal_with_articles()
+    UploadUtil.parse_and_generate(WechatArticleCrawler.wechat_article_result_path, Crawler.write_file_path)
