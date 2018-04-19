@@ -192,11 +192,13 @@ class GuoJi(YaoWen):
         # 删除文章中不必要的
         imgs = article_body.findAll("img")
         if len(imgs) == 0:
-            return ""
+            img_url = ""
+        else:
+            img_url = imgs[0].get("src")
         content = self.parse_content(article_body)
         self.save_file(content, url)
         self.save_abstract(article_body, url)
-        return imgs[0].get("src")
+        return img_url
 
 
 class ShePing(GuoJi):
