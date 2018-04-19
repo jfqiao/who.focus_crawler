@@ -158,7 +158,7 @@ class UploadUtil(object):
 
     @staticmethod
     def post_file_to_server(file_name, school):
-        url = "https://www.leftbrain.cc/who.focus_final/uploadSchoolArticles"
+        url = "https://www.leftbrain.cc/who.focus_test/uploadSchoolArticles"
         data = {"school": school}
         upload_file_name = "result.xls"
         file_name += ".xls"
