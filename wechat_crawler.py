@@ -77,6 +77,7 @@ class WechatArticleCrawler(object):
         while bs_obj.find("img", id="seccodeImage") is not None:
             WechatArticleCrawler.headers["Cookie"] = input("输入新的Cookie")
             bs_obj = BeautifulSoup(res.content, "html.parser")
+            return ""
         if res.status_code == 404:
             print(url)
             return ""
@@ -129,6 +130,7 @@ class WechatArticleCrawler(object):
                     i = i + 1
                     print(i)
                 except BaseException as e:
+                    i = i + 1      # 隐藏的BUG会导致严重地问题
                     print(e)
         except BaseException as e:
             print(e)

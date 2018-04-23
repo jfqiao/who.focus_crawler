@@ -7,7 +7,7 @@ import time
 from website_crawler.crawler import Crawler
 
 
-class Explainers(Crawler):
+class Business(Crawler):
 
     update_stop = 0  # stop crawler.
 
@@ -15,8 +15,8 @@ class Explainers(Crawler):
                              "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.162 Safari/537.36"}
 
     def __init__(self):
-        self.page_url = "https://www.vox.com/explainers"
-        self.origin = "Vox"
+        self.page_url = "https://www.theatlantic.com/business/"
+        self.origin = "Theatlantic"
         self.label = "English"
 
     def insert_line(self, result, item):
@@ -24,7 +24,7 @@ class Explainers(Crawler):
 
     def crawl(self):
         try:
-            resp = requests.get(url=self.page_url, headers=Explainers.headers)
+            resp = requests.get(url=self.page_url, headers=Business.headers)
             if resp.status_code != 200:
                 return
             bs_obj = BeautifulSoup(resp.content, "html.parser")
@@ -38,13 +38,13 @@ class Explainers(Crawler):
                     url = href.get("href")
                     select_result = self.select_url(url)
                     if select_result:  # 查看数据库是否已经有该链接
-                        Explainers.update_stop = 1  # 如果有则可以直接停止
+                        Business.update_stop = 1  # 如果有则可以直接停止
                         break
                     image_url = article.find("noscript").find("img").get("src")
                     rel_date = article.find("time", class_="c-byline__item").get_text()
                     date = self.convert_date(rel_date)
                     if date < self.target_date:  # 比较文章的发表时间，可以保留特定时间段内的文章
-                        Explainers.update_stop = 1  # 如果文章的发表时间在给定的时间之前，则停止爬虫
+                        Business.update_stop = 1  # 如果文章的发表时间在给定的时间之前，则停止爬虫
                         break
                     date_str = date.strftime(Crawler.time_format)
                     self.get_article_content(url)
@@ -54,14 +54,14 @@ class Explainers(Crawler):
                     self.insert_url(url)
                     print(url)
                 except BaseException as e:
-                    print("VOX crawl error. ErrMsg: %s" % str(e))
+                    print("Theatlantic crawl error. ErrMsg: %s" % str(e))
         except BaseException as e:
-            print("VOX crawl error. ErrMsg: %s" % str(e))
+            print("Theatlantic crawl error. ErrMsg: %s" % str(e))
         finally:
-            Explainers.update_stop = 0    # 重置为开始状态，为后续爬其他模块做准备。
+            Business.update_stop = 0    # 重置为开始状态，为后续爬其他模块做准备。
 
     def get_article_content(self, url):
-        resp = requests.get(url, headers=Explainers.headers)
+        resp = requests.get(url, headers=Business.headers)
         article_html = BeautifulSoup(resp.content, "lxml")
         article_body = article_html.find("div", class_="c-entry-content")
         content = self.parse_content(article_body)
@@ -84,7 +84,7 @@ class Explainers(Crawler):
                 date = datetime.datetime.strptime(date_str, time_format)
             return date
         except BaseException as e:
-            print("Convert time error in VOX. ErrMsg: %s" % str(e))
+            print("Convert time error in Theatlantic. ErrMsg: %s" % str(e))
 
     def crawl_image_and_save(self, image_url):
         # 在调用save_file后，调用此方法用于保存图片。
@@ -92,7 +92,7 @@ class Explainers(Crawler):
         pos = file_name.find("?")
         if pos > 0:
             file_name = file_name[:pos]
-        resp = requests.get(image_url, headers=Explainers.headers)
+        resp = requests.get(image_url, headers=Business.headers)
         content_type = resp.headers.get("Content-Type")
         f = open(Crawler.write_image_path + "/" + file_name, "wb")
         f.write(resp.content)
@@ -102,7 +102,7 @@ class Explainers(Crawler):
         f.close()
 
 
-class Item(Explainers):
+class Item(Business):
 
     def __init__(self, category):
         super().__init__()
