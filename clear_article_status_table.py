@@ -48,11 +48,11 @@ class ClearFunction(object):
         :return:
         """
         sql_format = "DELETE FROM t_article_status WHERE article_id = %s"
-        delete_article = "DELETE FROM t_article WHERE id = %s"
+        # delete_article = "DELETE FROM t_article WHERE id = %s"
         for item in article_ids:
             sql = sql_format % item["id"]
             DBUtil.update_data(sql)
-            DBUtil.update_data(delete_article % item["id"])
+            # DBUtil.update_data(delete_article % item["id"])
             # 不删除文章，用另外一种方式处理。
             # file_path = ClearFunction.article_path + item["url"].replace(":", "").replace("/", "")
             # os.system("rm -rf \"%s\"" % file_path)     # 删除文章
@@ -102,7 +102,11 @@ class ClearFunction(object):
 
 def move_article_and_image():
     article_id_sql = "SELECT DISTINCT article_id from t_article_status"
+    target_school_article_sql = "SELECT id FROM t_article WHERE origin = \"中国政法大学\""
     result = DBUtil.select_datas(article_id_sql)
+    target_result = DBUtil.select_datas(target_school_article_sql)
+    for item in target_result:
+        result.append(item)
     image_path = "/data/who_focus/image/"
     article_path = "/home/jfqiao/wechat_articles/"
     for item in result:
