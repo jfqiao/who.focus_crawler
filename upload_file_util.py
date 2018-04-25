@@ -5,7 +5,8 @@ import xlrd
 import random
 import datetime
 import requests
-import html.parser
+from website_crawler.crawler import Crawler
+from school_crawler import zhong_guo_zheng_fa_da_xue
 
 
 class Record(object):
@@ -41,9 +42,9 @@ class Record(object):
 
 class UploadUtil(object):
 
-    # school_result_dir = "/Users/jfqiao/Desktop/write_aritlce_dirs/"
+    school_result_dir = "/Users/jfqiao/Desktop/write_aritlce_dirs/"
 
-    school_result_dir = "/home/jfqiao/crawler/school_reuslt_dir/"
+    # school_result_dir = "/home/jfqiao/crawler/school_reuslt_dir/"
 
     schools = ["北京大学", "清华大学", "复旦大学", "浙江大学", "中国人民大学", "中央财经大学", "对外经济贸易大学", "北京师范大学",
                "中国政法大学", "中山大学", "其他高校"]
@@ -158,7 +159,7 @@ class UploadUtil(object):
 
     @staticmethod
     def post_file_to_server(file_name, school):
-        url = "https://www.leftbrain.cc/who.focus_test/uploadSchoolArticles"
+        url = "http://localhost:8080/uploadSchoolArticles"
         data = {"school": school}
         upload_file_name = "result.xls"
         file_name += ".xls"
@@ -166,11 +167,18 @@ class UploadUtil(object):
         resp = requests.post(url, data=data, files=files)
         print(resp.text)
 
+    @staticmethod
+    def generate_target_school_message(xls_path, school):
+        result_list = []
+        title_list = []
+        UploadUtil.parse_xls_file(xls_path, result_list, title_list)
+        UploadUtil.set_record_info(result_list, [])
+        time_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        UploadUtil.generate_school_xls_file(result_list, school + "_" + time_str)
+        UploadUtil.post_file_to_server(school + "_" + time_str, school)
+
 
 if __name__ == "__main__":
-    wechat = None
-    website = None
-    UploadUtil.parse_and_generate(wechat, website)
-    # path = "/Users/jfqiao/Desktop/审核文章/result_2018-04-13_16-35.xls"
-    # school_name = "北京大学"
-    # UploadUtil.post_file_to_server(path, school_name)
+    school_name = "中国政法大学"
+    zhong_guo_zheng_fa_da_xue.crawl()
+    UploadUtil.generate_target_school_message(Crawler.write_file_path, school_name)

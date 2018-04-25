@@ -2,7 +2,8 @@
 import requests
 from bs4 import BeautifulSoup
 import datetime
-import time
+import json
+import bs4
 
 from website_crawler.crawler import Crawler
 
@@ -43,7 +44,9 @@ class JiaoWuChu(Crawler):
                     if select_result:  # 查看数据库是否已经有该链接
                         JiaoWuChu.update_stop = 1  # 如果有则可以直接停止
                         break
-                    image_url = ""                       # 没有图片
+                    image_url = "https://gss3.bdstatic.com/7Po3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike80%2C5%2C" \
+                                "5%2C80%2C26/sign=82ddde93a786c9171c0e5a6ba8541baa/7af40ad162d9f2d3403b1e84a9ec8a" \
+                                "136327ccb6.jpg"                       # 没有图片
                     rel_date = article.find("span").get_text()
                     # 文章发布的时间，一周以内是相对时间（天），今天的文章则相对时间为（时|分）， 其他时间则是绝对时间yyyy-mm-dd
                     date = self.convert_date(rel_date)
@@ -52,7 +55,7 @@ class JiaoWuChu(Crawler):
                         break
                     date_str = date.strftime(Crawler.time_format)
                     self.get_article_content(url)
-                    self.crawl_image_and_save(image_url)
+                    # self.crawl_image_and_save(image_url)
                     self.write_data_to_sheet(title, url, image_url, date_str,
                                              date_str, self.label, self.origin)
                     self.insert_url(url)
@@ -81,6 +84,25 @@ class JiaoWuChu(Crawler):
         except BaseException as e:
             print("Convert time error in ZhongGuoZheFaDaXue. ErrMsg: %s" % str(e))
 
+    def parse_content(self, bs_obj):
+        result = []
+        items = bs_obj.descendants
+        for item in items:
+            if type(item) == bs4.element.NavigableString:
+                continue
+            # p标签以及对立的span标签都是需要的，但是p标签可能包含span标签
+            if item.name == "p":
+                if item.find("img") is None:
+                    self.insert_line(result, item)
+            elif item.name == "img":
+                src = JiaoWuChu.website_url + item.get("src")
+                result.append({"type": "image", "data": src})
+            elif item.name == "span":
+                if self.check_parent(item):
+                    self.insert_line(result, item)
+                    # result.append({"type": "text", "data": item.__str__()})
+        return json.dumps(result).encode("UTF-8").decode("UTF-8")
+
 
 class XinWenDongTai(JiaoWuChu):
 
@@ -90,8 +112,10 @@ class XinWenDongTai(JiaoWuChu):
 
 
 def crawl():
+    Crawler.initialize_workbook()
     jwc = JiaoWuChu()
     jwc.crawl()
+    Crawler.save_workbook()
 
 
 if __name__ == "__main__":

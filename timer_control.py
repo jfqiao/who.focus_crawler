@@ -35,6 +35,8 @@ from website_crawler import xiao_bai_chuang_ye
 from website_crawler.society_website import she_hui_website
 from upload_file_util import UploadUtil
 
+from school_crawler import zhong_guo_zheng_fa_da_xue
+
 from website_crawler.crawler import Crawler
 
 host = "118.190.201.165"
@@ -243,3 +245,5 @@ if __name__ == "__main__":
     website_crawler()
     server_deal_with_articles()
     UploadUtil.parse_and_generate(WechatArticleCrawler.wechat_article_result_path, Crawler.write_file_path)
+    zhong_guo_zheng_fa_da_xue.crawl()
+    UploadUtil.generate_target_school_message(Crawler.write_file_path, "中国政法大学")
