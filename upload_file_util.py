@@ -28,7 +28,7 @@ class Record(object):
 
     max_hot_rate_status = 295
 
-    def __init__(self, title, url, image_url, origin, label, publish_time):
+    def __init__(self, title, url, image_url, label, origin, publish_time):
         self.title = title
         self.url = url
         self.image_url = image_url
@@ -67,7 +67,8 @@ class UploadUtil(object):
             label = read_table.cell(i, 3).value
             origin = read_table.cell(i, 4).value
             publish_time = read_table.cell(i, 5).value
-            result_list.append(Record(title, url, image_url, label, origin, publish_time))
+            result_list.append(Record(title=title, url=url, image_url=image_url, label=label, origin=origin,
+                                      publish_time=publish_time))
 
     @staticmethod
     def select_record(result_list):
@@ -126,8 +127,8 @@ class UploadUtil(object):
         write_sheet.write(line_count, 0, title)
         write_sheet.write(line_count, 1, url)
         write_sheet.write(line_count, 2, image_url)
-        write_sheet.write(line_count, 3, origin)
-        write_sheet.write(line_count, 4, label)
+        write_sheet.write(line_count, 3, label)
+        write_sheet.write(line_count, 4, origin)
         write_sheet.write(line_count, 5, publish_time)
         write_sheet.write(line_count, 6, read_num)
         write_sheet.write(line_count, 7, status)
@@ -159,7 +160,7 @@ class UploadUtil(object):
 
     @staticmethod
     def post_file_to_server(file_name, school):
-        url = "http://www.leftbrain.cc/who.focus_test/uploadSchoolArticles"
+        url = "https://www.leftbrain.cc/who.focus_final/uploadSchoolArticles"
         data = {"school": school}
         upload_file_name = "result.xls"
         file_name += ".xls"
@@ -183,5 +184,5 @@ class UploadUtil(object):
 if __name__ == "__main__":
     school_name = "中国政法大学"
     # zhong_guo_zheng_fa_da_xue.crawl()
-    path = "/Users/jfqiao/Desktop/write_aritlce_dirs/result_2018-04-25_21-48.xls"
+    path = "/Users/jfqiao/Desktop/write_aritlce_dirs/result_2018-04-26_17-40.xls"
     UploadUtil.generate_target_school_message(path, school_name)

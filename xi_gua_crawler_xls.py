@@ -14,7 +14,7 @@ class XiGuaCrawler(object):
 
     need_crawl_tag = ["商业资讯", "社会观点", "校园学习", "时尚", "体育", "电影", "游戏", "趣味", "读书"]
 
-    insert_sql_format = "INSERT INTO t_article_url(url) VALUES(\"%s\")"
+    insert_sql_format = "INSERT INTO t_article_url(url, insert_time) VALUES(\"%s\", \"%s\")"
 
     select_sql_format = "SELECT * FROM t_article_url WHERE url = \"%s\""
 
@@ -93,6 +93,7 @@ class XiGuaCrawler(object):
 
     @staticmethod
     def craw_tag(tag_name, tag_id, write_sheet):
+        time_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         page = 1
         while 1:
             url = XiGuaCrawler.page_url_format % (tag_id, page)
@@ -110,7 +111,7 @@ class XiGuaCrawler(object):
                 link = href_tag.get("href")
                 # 利用数据库保存已有的链接，如果没有在数据库中，插入数据库，并写入文件，否则不插入数据库，也不写入文件。
                 if DBUtil.select_data(XiGuaCrawler.select_sql_format % link) is None:
-                    DBUtil.insert_data(XiGuaCrawler.insert_sql_format % link)
+                    DBUtil.insert_data(XiGuaCrawler.insert_sql_format % (link, time_str))
                     source_tag = article_tag.find("div", class_="item-source")
                     origin = source_tag.find("div", class_="item-title").get_text()
                     rel_time = source_tag.find("div", class_="item-sub-title").get_text()
