@@ -236,6 +236,17 @@ def transfer_file(src, target, host_para, user_para, password_para):
     ssh.close()
 
 
+def school_message_crawler(school):
+    zhong_guo_zheng_fa_da_xue.crawl()
+    article_path_dir, article_target_dir = get_dir(Crawler.write_article_path)
+    os.chdir(article_path_dir)
+    os.system("tar -czvf result4.tar.gz %s" % article_target_dir)
+    src = article_path_dir + "/result4.tar.gz"
+    target = "/home/jfqiao/result/"
+    transfer_file(src, target, host, user, password)
+    UploadUtil.generate_target_school_message(Crawler.write_file_path, school)
+
+
 if __name__ == "__main__":
     # timer()
     now = datetime.datetime.now()
@@ -245,5 +256,4 @@ if __name__ == "__main__":
     website_crawler()
     server_deal_with_articles()
     UploadUtil.parse_and_generate(WechatArticleCrawler.wechat_article_result_path, Crawler.write_file_path)
-    zhong_guo_zheng_fa_da_xue.crawl()
-    UploadUtil.generate_target_school_message(Crawler.write_file_path, "中国政法大学")
+    school_message_crawler("中国政法大学")

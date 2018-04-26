@@ -159,7 +159,7 @@ class UploadUtil(object):
 
     @staticmethod
     def post_file_to_server(file_name, school):
-        url = "http://localhost:8080/uploadSchoolArticles"
+        url = "http://www.leftbrain.cc/who.focus_test/uploadSchoolArticles"
         data = {"school": school}
         upload_file_name = "result.xls"
         file_name += ".xls"
@@ -173,6 +173,8 @@ class UploadUtil(object):
         title_list = []
         UploadUtil.parse_xls_file(xls_path, result_list, title_list)
         UploadUtil.set_record_info(result_list, [])
+        for item in result_list:
+            item.status = 3
         time_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         UploadUtil.generate_school_xls_file(result_list, school + "_" + time_str)
         UploadUtil.post_file_to_server(school + "_" + time_str, school)
@@ -180,5 +182,6 @@ class UploadUtil(object):
 
 if __name__ == "__main__":
     school_name = "中国政法大学"
-    zhong_guo_zheng_fa_da_xue.crawl()
-    UploadUtil.generate_target_school_message(Crawler.write_file_path, school_name)
+    # zhong_guo_zheng_fa_da_xue.crawl()
+    path = "/Users/jfqiao/Desktop/write_aritlce_dirs/result_2018-04-25_21-48.xls"
+    UploadUtil.generate_target_school_message(path, school_name)

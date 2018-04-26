@@ -27,8 +27,15 @@ class JiaoWuChu(Crawler):
 
     def crawl(self):
         try:
-            resp = requests.get(url=self.page_url)
+            # page = 20
+            # while not JiaoWuChu.update_stop:
+            #     if page == 20:
+            url = self.page_url
+            #     else:
+            #         url = "http://jwc.cupl.edu.cn/index/tzgg/%s.htm" % page
+            resp = requests.get(url, timeout=5)
             if resp.status_code != 200:
+                # break
                 return
             bs_obj = BeautifulSoup(resp.content, "html.parser")
             articles_list = bs_obj.find("div", class_="list major").find("ul").findAll("li")
@@ -39,7 +46,10 @@ class JiaoWuChu(Crawler):
                     self.label = article.find("a").get_text()[1:-2]
                     href = article.find("a", class_="title")
                     title = href.get_text()
+                    # if page == 20:
                     url = JiaoWuChu.website_url + href.get("href")[2:]              # url有一个".."回退。
+                    # else:
+                    #     url = JiaoWuChu.website_url + href.get("href")[5:]
                     select_result = self.select_url(url)
                     if select_result:  # 查看数据库是否已经有该链接
                         JiaoWuChu.update_stop = 1  # 如果有则可以直接停止
@@ -62,13 +72,14 @@ class JiaoWuChu(Crawler):
                     print(url)
                 except BaseException as e:
                     print("ZhongGuoZheFaDaXue crawl error. ErrMsg: %s" % str(e))
+                # page -= 1
         except BaseException as e:
             print("ZhongGuoZheFaDaXue crawl error. ErrMsg: %s" % str(e))
         finally:
             JiaoWuChu.update_stop = 0    # 重置为开始状态，为后续爬其他模块做准备。
 
     def get_article_content(self, url):
-        resp = requests.get(url)
+        resp = requests.get(url, timeout=5)
         article_html = BeautifulSoup(resp.content, "lxml")
         article_body = article_html.find("div", class_="content")
         content = self.parse_content(article_body)
