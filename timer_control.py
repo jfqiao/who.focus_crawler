@@ -256,7 +256,7 @@ if __name__ == "__main__":
     wechat_article_crawler()        # 爬文章并将生成的文件打包上传到服务器
     website_crawler()               # 爬网站文章并将生成的文件打包上传到服务器
     # 爬学校资讯，并生成XLS文件，然后上传到服务器，
-    school_message_crawler("中国政法大学")
+    # school_message_crawler("中国政法大学")
     server_deal_with_articles()      # 服务器解压缩上传的文件，并将文章图片移动到相关的文件夹
     # 上传生成的xls文件到服务器
     UploadUtil.parse_and_generate(WechatArticleCrawler.wechat_article_result_path, Crawler.write_file_path)

@@ -28,7 +28,7 @@ class Crawler(object):
 
     is_article_dir_exists = 0     # 针对保存爬的文章的文件夹是否存在的标志，默认文件夹不存在，需要创建
 
-    article_dir_parent =  base_dir + "wechat_articles/"       # 保存文章的根目录，
+    article_dir_parent = base_dir + "wechat_articles/"       # 保存文章的根目录，
 
     article_dir_absolute = ""
 
@@ -50,13 +50,15 @@ class Crawler(object):
 
     insert_sql = "INSERT INTO t_article_url(url, insert_time) VALUES(\"%s\", \"%s\")"
 
-    target_date = datetime.datetime.strptime("2018-04-16 23:59:59", "%Y-%m-%d %H:%M:%S")
+    target_date = datetime.datetime.strptime("2017-06-30 23:59:59", "%Y-%m-%d %H:%M:%S")
 
     write_file_path = ""
 
     write_image_path = ""
 
     write_article_path = ""
+
+    image_url = "https://www.leftbrain.cc/image/"    # get image from server.
 
     @staticmethod
     def save_workbook():
@@ -175,6 +177,16 @@ class Crawler(object):
             if item is None:
                 return 1
             if item.name == "p" or item.name == "span":
+                return 0
+        return 1
+
+    @staticmethod
+    def check_table_parent(tag):
+        parents = tag.parents
+        for item in parents:
+            if item is None:
+                return 1
+            if item.name == "td" or item.name == "tr" or item.name == "table":
                 return 0
         return 1
 
